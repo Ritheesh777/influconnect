@@ -6,7 +6,8 @@ const baseURL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api';
 
-export const api = axios.create({ baseURL });
+// 65s timeout tolerates a free-tier host cold start (which can take ~50s).
+export const api = axios.create({ baseURL, timeout: 65000 });
 
 export const TOKEN_KEY = 'influ_token';
 
@@ -36,14 +37,29 @@ api.interceptors.response.use(
     }
     return res;
   },
-  (error) => {
+  async (error) => {
+    const config = error.config || {};
+    const method = (config.method || 'get').toLowerCase();
+    const status = error.response?.status;
+    // Retry idempotent GETs through a host cold start: network error, timeout,
+    // or a gateway status. Spaced delays cover the ~50s a free host takes to wake.
+    const retryable =
+      !error.response || error.code === 'ECONNABORTED' || [502, 503, 504].includes(status);
+    if (method === 'get' && retryable) {
+      config.__retry = (config.__retry || 0) + 1;
+      if (config.__retry <= 5) {
+        await new Promise((r) => setTimeout(r, 3000 * config.__retry)); // 3,6,9,12,15s
+        return api(config);
+      }
+    }
+
     const message =
       error.response?.data?.message || error.message || 'Something went wrong. Please try again.';
     const details = error.response?.data?.details;
-    if (error.response?.status === 401 && !error.config?.url?.includes('/auth/')) {
+    if (status === 401 && !config.url?.includes('/auth/')) {
       setAuthToken(null);
     }
-    return Promise.reject({ message, details, status: error.response?.status });
+    return Promise.reject({ message, details, status });
   }
 );
 
