@@ -146,7 +146,7 @@ export default function Landing() {
         </Reveal>
         <Stagger className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {STEPS.map((s, i) => (
-            <StaggerItem key={s.title} className="card glow-card group relative p-6">
+            <StaggerItem key={s.title} className="card fx-tilt group relative p-6">
               <div className="grid h-12 w-12 place-items-center rounded-2xl bg-brand-gradient text-white shadow-lift transition-transform duration-300 group-hover:-translate-y-1 group-hover:scale-105">
                 <s.icon className="h-5 w-5" strokeWidth={2} />
               </div>
@@ -261,8 +261,8 @@ function PathCard({ tone, Icon, title, points, cta }) {
       <div className="p-6">
         <ul className="space-y-2.5">
           {points.map((p) => (
-            <li key={p} className="flex items-center gap-2.5 text-sm text-ink-600">
-              <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+            <li key={p} className="flex items-center gap-2.5 text-sm font-medium text-ink-800">
+              <span className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-emerald-100 text-emerald-600">
                 <IconCheck className="h-3 w-3" strokeWidth={3} />
               </span>
               {p}

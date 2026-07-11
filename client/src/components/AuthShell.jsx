@@ -34,7 +34,7 @@ export default function AuthShell({ title, subtitle, children, side = 'creator' 
       {/* Left: form */}
       <div className="flex w-full flex-col justify-center px-6 py-10 sm:px-12 lg:w-1/2">
         <FadeIn className="mx-auto w-full max-w-md">
-          <div className="glow-card glass-strong rounded-3xl p-7 shadow-glass-lg sm:p-9">
+          <div className="glass-strong rounded-3xl p-7 shadow-glass-lg sm:p-9">
             <Logo />
             <h1 className="mt-8 text-2xl font-bold text-ink-950">{title}</h1>
             {subtitle && <p className="mt-1.5 text-sm text-ink-500">{subtitle}</p>}

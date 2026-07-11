@@ -25,18 +25,20 @@ export default {
           600: '#c026d3',
           700: '#a21caf',
         },
-        // Warm-neutral ink scale for text/surfaces
+        // Warm-neutral ink scale for text/surfaces.
+        // Mid tones (400–600) are deliberately dark so body/muted text stays
+        // high-contrast and readable on translucent glass surfaces.
         ink: {
           50: '#f7f7f9',
           100: '#eeeef2',
           200: '#dcdce4',
-          300: '#c0c1ce',
-          400: '#9c9daf',
-          500: '#797b90',
-          600: '#5f6175',
-          700: '#4b4c5d',
-          800: '#33343f',
-          900: '#1c1c24',
+          300: '#b9bac8',
+          400: '#7c7e92',
+          500: '#565971',
+          600: '#3e4052',
+          700: '#33343f',
+          800: '#26272f',
+          900: '#181920',
           950: '#0b0b14',
         },
       },

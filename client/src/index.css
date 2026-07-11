@@ -121,14 +121,14 @@
 
   /* ── Glass surfaces ──────────────────────────────── */
   .glass {
-    @apply border border-white/50 bg-white/50 backdrop-blur-xl;
+    @apply border border-white/50 bg-white/70 backdrop-blur-xl;
   }
   .glass-strong {
-    @apply border border-white/60 bg-white/75 backdrop-blur-2xl;
+    @apply border border-white/60 bg-white/85 backdrop-blur-2xl;
   }
-  /* Default card = frosted glass panel (medium blur: many render in grids) */
+  /* Default card = frosted glass panel (more opaque now so text stays crisp) */
   .card {
-    @apply rounded-2xl border border-white/60 bg-white/70 shadow-glass backdrop-blur-md;
+    @apply rounded-2xl border border-white/70 bg-white/90 shadow-glass backdrop-blur-md;
   }
   /* Opaque card for dense data (tables) where blur hurts legibility */
   .card-solid {
