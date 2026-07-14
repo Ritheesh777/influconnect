@@ -103,9 +103,9 @@ export default function DashboardLayout() {
 
   return (
     <div className="flex min-h-screen">
-      {/* Desktop sidebar */}
-      <aside className="glass hidden w-64 shrink-0 flex-col border-r border-white/50 lg:flex">
-        <div className="flex h-16 items-center border-b border-white/40 px-5">
+      {/* Desktop sidebar — sticky full-height so it never drifts with the page */}
+      <aside className="glass sticky top-0 hidden h-screen w-64 shrink-0 flex-col overflow-y-auto border-r border-ink-200 lg:flex">
+        <div className="flex h-16 shrink-0 items-center border-b border-ink-200 px-5">
           <Logo to={`/${user?.role}`} />
         </div>
         {SideNav}

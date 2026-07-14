@@ -5,6 +5,8 @@ import { CreatorProfile } from '../models/CreatorProfile.js';
 import { Application } from '../models/Application.js';
 import { Review } from '../models/Review.js';
 import { User } from '../models/User.js';
+import { Collaboration } from '../models/Collaboration.js';
+import { tierFor } from '../utils/tiers.js';
 
 // GET /api/creator/me
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -35,7 +37,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 // PATCH /api/creator/me/avatar  (multipart: avatar)
 export const updateAvatar = asyncHandler(async (req, res) => {
   if (!req.file) throw ApiError.badRequest('No image provided');
-  const r = await uploadBuffer(req.file.buffer, 'influconnect/creator/avatars', 'image');
+  const r = await uploadBuffer(req.file.buffer, 'influconnect/creator/avatars', 'image', req.file.mimetype);
   const profile = await CreatorProfile.findOneAndUpdate(
     { user: req.user._id },
     { avatarUrl: r.url },
@@ -63,7 +65,7 @@ export const addPortfolioItems = asyncHandler(async (req, res) => {
     for (const f of req.files) {
       const isPdf = f.mimetype.includes('pdf');
       const isVideo = f.mimetype.includes('video');
-      const r = await uploadBuffer(f.buffer, 'influconnect/creator/portfolio');
+      const r = await uploadBuffer(f.buffer, 'influconnect/creator/portfolio', 'auto', f.mimetype);
       items.push({
         type: isPdf ? 'pdf' : isVideo ? 'video' : 'image',
         title: f.originalname,
@@ -94,7 +96,7 @@ export const removePortfolioItem = asyncHandler(async (req, res) => {
 // PATCH /api/creator/me/media-kit (multipart: file)
 export const updateMediaKit = asyncHandler(async (req, res) => {
   if (!req.file) throw ApiError.badRequest('No file provided');
-  const r = await uploadBuffer(req.file.buffer, 'influconnect/creator/mediakit');
+  const r = await uploadBuffer(req.file.buffer, 'influconnect/creator/mediakit', 'auto', req.file.mimetype);
   const profile = await CreatorProfile.findOneAndUpdate(
     { user: req.user._id },
     { mediaKitUrl: r.url },
@@ -106,10 +108,11 @@ export const updateMediaKit = asyncHandler(async (req, res) => {
 // GET /api/creator/dashboard
 export const getDashboard = asyncHandler(async (req, res) => {
   const creatorId = req.user._id;
-  const [applicationsSent, accepted, pending] = await Promise.all([
+  const [applicationsSent, accepted, pending, completedCollabs] = await Promise.all([
     Application.countDocuments({ creator: creatorId }),
     Application.countDocuments({ creator: creatorId, status: 'accepted' }),
     Application.countDocuments({ creator: creatorId, status: 'pending' }),
+    Collaboration.countDocuments({ creator: creatorId, status: 'completed' }),
   ]);
   const recentApplications = await Application.find({ creator: creatorId })
     .sort('-createdAt')
@@ -118,7 +121,8 @@ export const getDashboard = asyncHandler(async (req, res) => {
     .lean();
   res.json({
     success: true,
-    stats: { applicationsSent, accepted, pending },
+    stats: { applicationsSent, accepted, pending, completedCollabs },
+    tier: tierFor(completedCollabs),
     recentApplications,
   });
 });
@@ -135,7 +139,12 @@ export const getPublicCreator = asyncHandler(async (req, res) => {
     .limit(20)
     .populate('author', 'name')
     .lean();
-  res.json({ success: true, profile, reviews });
+  // Completed on-platform collaborations drive the creator's public tier badge
+  const completed = await Collaboration.countDocuments({
+    creator: req.params.id,
+    status: 'completed',
+  });
+  res.json({ success: true, profile, reviews, tier: tierFor(completed) });
 });
 
 // GET /api/creator  (search creators — used by companies for Method Two/invitations)

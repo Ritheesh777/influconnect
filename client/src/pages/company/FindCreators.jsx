@@ -4,7 +4,7 @@ import { useAsync } from '../../hooks/useAsync.js';
 import { creatorApi } from '../../api/endpoints.js';
 import { PageLoader, Avatar, EmptyState, Pagination } from '../../components/ui.jsx';
 import { compactNumber } from '../../utils/format.js';
-import { CAMPAIGN_CATEGORIES, ALL_PLATFORMS, PLATFORM_LABELS } from '../../utils/constants.js';
+import { CAMPAIGN_CATEGORIES, ALL_PLATFORMS, PLATFORM_LABELS, FOLLOWER_FILTERS } from '../../utils/constants.js';
 import { IconVerified, IconUsers, IconPin, IconSearch, PLATFORM_ICON } from '../../components/icons.jsx';
 
 export default function FindCreators() {
@@ -16,11 +16,28 @@ export default function FindCreators() {
 
   const set = (k) => (e) => setFilters((f) => ({ ...f, [k]: e.target.value, page: 1 }));
 
+  // Follower bracket -> min/max numbers the API understands
+  const setFollowers = (e) => {
+    const idx = e.target.value;
+    setFilters((f) => {
+      const next = { ...f, followerBracket: idx, page: 1 };
+      if (idx === '') {
+        delete next.minFollowers;
+        delete next.maxFollowers;
+      } else {
+        const b = FOLLOWER_FILTERS[Number(idx)];
+        next.minFollowers = b.min;
+        next.maxFollowers = b.max;
+      }
+      return next;
+    });
+  };
+
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-bold text-slate-900">Find Creators</h1>
+      <h1 className="text-2xl font-bold text-ink-950">Find Creators</h1>
 
-      <div className="card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-5">
+      <div className="card grid gap-3 p-4 sm:grid-cols-2 lg:grid-cols-6">
         <input className="input lg:col-span-2" placeholder="Search name or username…" onChange={set('q')} />
         <select className="input" onChange={set('category')} value={filters.category || ''}>
           <option value="">All categories</option>
@@ -29,6 +46,12 @@ export default function FindCreators() {
         <select className="input" onChange={set('platform')} value={filters.platform || ''}>
           <option value="">All platforms</option>
           {ALL_PLATFORMS.map((p) => <option key={p} value={p}>{PLATFORM_LABELS[p]}</option>)}
+        </select>
+        <select className="input" onChange={setFollowers} value={filters.followerBracket ?? ''}>
+          <option value="">Any followers</option>
+          {FOLLOWER_FILTERS.map((b, i) => (
+            <option key={b.label} value={i}>{b.label} followers</option>
+          ))}
         </select>
         <input className="input" placeholder="City" onChange={set('city')} />
       </div>

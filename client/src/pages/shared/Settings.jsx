@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { authApi, notificationApi } from '../../api/endpoints.js';
 import { Field } from '../../components/ui.jsx';
@@ -6,6 +7,12 @@ import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function Settings() {
   const { user, logout, refresh } = useAuth();
+  const navigate = useNavigate();
+  // Clear the session AND send them straight to the login page.
+  const doLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
   const [pw, setPw] = useState({ currentPassword: '', newPassword: '', confirm: '' });
   const [prefs, setPrefs] = useState(user?.notificationPrefs || { email: true, browser: true });
   const [busy, setBusy] = useState(false);
@@ -70,7 +77,7 @@ export default function Settings() {
       <div className="card border-rose-200 p-6">
         <h2 className="font-semibold text-rose-600">Danger Zone</h2>
         <p className="mt-1 text-sm text-slate-500">Log out of your account on this device.</p>
-        <button onClick={logout} className="btn-outline mt-4 border-rose-300 text-rose-600">Logout</button>
+        <button onClick={doLogout} className="btn-outline mt-4 border-rose-300 text-rose-600">Logout</button>
       </div>
     </div>
   );

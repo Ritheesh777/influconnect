@@ -70,6 +70,8 @@ export const chatApi = {
   conversations: () => api.get('/chat/conversations').then((r) => r.data),
   messages: (id) => api.get(`/chat/conversations/${id}/messages`).then((r) => r.data),
   send: (id, data) => api.post(`/chat/conversations/${id}/messages`, data).then((r) => r.data),
+  deleteConversation: (id) => api.delete(`/chat/conversations/${id}`).then((r) => r.data),
+  deleteMessage: (id) => api.delete(`/chat/messages/${id}`).then((r) => r.data),
 };
 
 // ── Collaborations / Reviews / Notifications / Saved / Complaints ─

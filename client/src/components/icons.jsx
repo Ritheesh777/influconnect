@@ -62,6 +62,7 @@ export {
   Globe as IconGlobe,
   Briefcase as IconBriefcase,
   Heart as IconHeart,
+  Trophy as IconTrophy,
   Inbox as IconApplications,
 } from 'lucide-react';
 

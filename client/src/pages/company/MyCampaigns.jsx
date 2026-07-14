@@ -16,6 +16,16 @@ export default function MyCampaigns() {
     [tab]
   );
 
+  const publish = async (c) => {
+    try {
+      await campaignApi.setStatus(c._id, 'active');
+      toast.success('Campaign published — it\'s now live');
+      reload();
+    } catch (err) {
+      toast.error(err.message);
+    }
+  };
+
   const remove = async (c) => {
     if (!confirm(`Delete "${c.title}"? This cannot be undone.`)) return;
     try {
@@ -71,7 +81,12 @@ export default function MyCampaigns() {
                 <div className="text-sm text-slate-500 sm:col-span-2">{c.category}</div>
                 <div className="text-sm text-slate-500 sm:col-span-2">{c.applicationsCount} applied</div>
                 <div className="sm:col-span-2"><StatusBadge status={c.status} /></div>
-                <div className="flex gap-2 sm:col-span-1 sm:justify-end">
+                <div className="flex items-center gap-2 sm:col-span-1 sm:justify-end">
+                  {c.status === 'draft' && (
+                    <button onClick={() => publish(c)} className="chip border-brand-200 bg-brand-50 text-brand-700 hover:bg-brand-100" title="Publish this draft">
+                      Publish
+                    </button>
+                  )}
                   <Link to={`/company/campaigns/${c._id}/edit`} className="rounded-lg p-1.5 text-ink-400 hover:bg-ink-100 hover:text-brand-600" title="Edit"><IconEdit className="h-4 w-4" /></Link>
                   <button onClick={() => remove(c)} className="rounded-lg p-1.5 text-ink-400 hover:bg-rose-50 hover:text-rose-600" title="Delete"><IconTrash className="h-4 w-4" /></button>
                 </div>

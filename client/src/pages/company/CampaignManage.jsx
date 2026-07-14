@@ -72,10 +72,18 @@ export default function CampaignManage() {
 
         <div className="mt-5 flex flex-wrap gap-2 border-t border-ink-100 pt-5">
           <Link to={`/company/campaigns/${id}/edit`} className="btn-outline"><IconEdit className="h-4 w-4" /> Edit</Link>
+          {/* A draft must be publishable — otherwise it's stuck forever */}
+          {c.status === 'draft' && (
+            <button className="btn-brand" onClick={() => setStatus('active')}>
+              <IconPlay className="h-4 w-4" /> Publish Campaign
+            </button>
+          )}
           {c.status === 'active' ? (
             <button className="btn-outline" onClick={() => setStatus('paused')}><IconPause className="h-4 w-4" /> Pause</button>
           ) : c.status === 'paused' ? (
             <button className="btn-outline" onClick={() => setStatus('active')}><IconPlay className="h-4 w-4" /> Resume</button>
+          ) : c.status === 'closed' || c.status === 'completed' ? (
+            <button className="btn-outline" onClick={() => setStatus('active')}><IconPlay className="h-4 w-4" /> Reopen</button>
           ) : null}
           {c.status !== 'closed' && <button className="btn-outline" onClick={() => setStatus('closed')}>Close</button>}
           {c.status !== 'completed' && <button className="btn-primary" onClick={() => setStatus('completed')}>Mark Completed</button>}

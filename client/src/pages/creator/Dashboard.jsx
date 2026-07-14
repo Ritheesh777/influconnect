@@ -6,7 +6,7 @@ import { PageLoader, StatCard, StatusBadge, EmptyState } from '../../components/
 import CampaignCard from '../../components/CampaignCard.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { Stagger, StaggerItem } from '../../lib/motion.jsx';
-import { IconSend, IconHandshake, IconClock, IconSearch, IconArrowRight, IconSparkles } from '../../components/icons.jsx';
+import { IconSend, IconHandshake, IconClock, IconSearch, IconArrowRight, IconSparkles, IconTrophy } from '../../components/icons.jsx';
 
 export default function CreatorDashboard() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export default function CreatorDashboard() {
   }, []);
 
   if (loading) return <PageLoader />;
-  const { stats, recentApplications = [] } = data || {};
+  const { stats, recentApplications = [], tier } = data || {};
 
   return (
     <div className="space-y-6">
@@ -37,6 +37,8 @@ export default function CreatorDashboard() {
         <StatCard label="Accepted" value={stats?.accepted} icon={IconHandshake} accent="emerald" delay={0.05} />
         <StatCard label="Pending" value={stats?.pending} icon={IconClock} accent="amber" delay={0.1} />
       </div>
+
+      {tier && <TierCard tier={tier} />}
 
       <div>
         <div className="mb-3 flex items-center justify-between">
@@ -79,6 +81,56 @@ export default function CreatorDashboard() {
         ) : (
           <EmptyState icon={IconSend} title="No applications yet" subtitle="Apply to campaigns to see them here." />
         )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Loyalty tier card — the creator's completed on-platform collaborations
+ * unlock a discount on their future subscription (v2 billing).
+ */
+function TierCard({ tier }) {
+  const pct = tier.next
+    ? Math.min(100, Math.round((tier.completed / Math.max(tier.next.at, 1)) * 100))
+    : 100;
+  return (
+    <div className="card overflow-hidden">
+      <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-ink-900 text-paper">
+            <IconTrophy className="h-5 w-5" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-lg font-semibold text-ink-950">{tier.name}</h2>
+              {tier.discountPercent > 0 && (
+                <span className="badge bg-brand-50 text-brand-700">{tier.discountPercent}% off next plan</span>
+              )}
+            </div>
+            <p className="text-sm text-ink-500">
+              {tier.completed} completed collaboration{tier.completed === 1 ? '' : 's'} on InfluConnect
+            </p>
+          </div>
+        </div>
+        {tier.next ? (
+          <div className="sm:w-64">
+            <div className="mb-1 flex justify-between text-xs text-ink-500">
+              <span>
+                {tier.next.remaining} more → <span className="font-semibold text-ink-800">{tier.next.name}</span>
+              </span>
+              <span className="font-semibold text-brand-600">{tier.next.discountPercent}% off</span>
+            </div>
+            <div className="h-2 overflow-hidden rounded-full bg-ink-100">
+              <div className="h-full rounded-full bg-brand-500 transition-all" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        ) : (
+          <span className="badge bg-emerald-100 text-emerald-700">Top tier unlocked</span>
+        )}
+      </div>
+      <div className="border-t border-ink-200 bg-ink-50 px-5 py-2.5 text-xs text-ink-500">
+        Only collaborations completed on InfluConnect count toward your tier.
       </div>
     </div>
   );

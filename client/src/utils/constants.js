@@ -21,6 +21,17 @@ export const CAMPAIGN_TYPES = [
 
 export const FOLLOWER_RANGES = ['1K-5K', '5K-10K', '10K-25K', '25K-50K', '50K-100K', '100K+'];
 
+// Follower brackets mapped to real min/max numbers, for filtering creators
+export const FOLLOWER_FILTERS = [
+  { label: 'Under 1K', min: 0, max: 1000 },
+  { label: '1K – 5K', min: 1000, max: 5000 },
+  { label: '5K – 10K', min: 5000, max: 10000 },
+  { label: '10K – 25K', min: 10000, max: 25000 },
+  { label: '25K – 50K', min: 25000, max: 50000 },
+  { label: '50K – 100K', min: 50000, max: 100000 },
+  { label: '100K+', min: 100000, max: '' },
+];
+
 export const PLATFORMS = ['instagram', 'youtube', 'tiktok', 'facebook'];
 
 export const ALL_PLATFORMS = [

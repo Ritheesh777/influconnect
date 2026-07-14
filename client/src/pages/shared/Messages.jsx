@@ -5,7 +5,8 @@ import { Avatar, EmptyState, Spinner } from '../../components/ui.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useSocket } from '../../context/SocketContext.jsx';
 import { timeAgo } from '../../utils/format.js';
-import { IconMessage, IconArrowLeft, IconSend, IconFile } from '../../components/icons.jsx';
+import { IconMessage, IconArrowLeft, IconSend, IconTrash } from '../../components/icons.jsx';
+import toast from 'react-hot-toast';
 
 export default function Messages() {
   const { user } = useAuth();
@@ -37,7 +38,7 @@ export default function Messages() {
     if (!socket) return;
     const onNew = ({ conversationId, message }) => {
       if (conversationId === activeRef.current) {
-        setMessages((m) => [...m, message]);
+        addMessage(message);
         socket.emit('message:read', { conversationId });
       }
       setConversations((cs) =>
@@ -51,17 +52,68 @@ export default function Messages() {
     const onTyping = ({ conversationId, isTyping }) => {
       if (conversationId === activeRef.current) setTyping(isTyping);
     };
+    // Keep both sides in sync when the other party deletes
+    const onDeleted = ({ conversationId, messageId }) => {
+      if (conversationId === activeRef.current)
+        setMessages((m) => m.filter((x) => String(x._id) !== String(messageId)));
+    };
+    const onConvoDeleted = ({ conversationId }) => {
+      setConversations((cs) => cs.filter((c) => String(c._id) !== String(conversationId)));
+      if (conversationId === activeRef.current) {
+        setActive(null);
+        activeRef.current = null;
+        setMessages([]);
+      }
+    };
     socket.on('message:new', onNew);
     socket.on('typing', onTyping);
+    socket.on('message:deleted', onDeleted);
+    socket.on('conversation:deleted', onConvoDeleted);
     return () => {
       socket.off('message:new', onNew);
       socket.off('typing', onTyping);
+      socket.off('message:deleted', onDeleted);
+      socket.off('conversation:deleted', onConvoDeleted);
     };
   }, [socket]);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, typing]);
+
+  /**
+   * Append a message only if we don't already have it. The server both
+   * broadcasts to the conversation room AND acks the sender, so without this
+   * guard your own message appears twice until you reopen the thread.
+   */
+  const addMessage = (message) =>
+    setMessages((m) => (m.some((x) => String(x._id) === String(message._id)) ? m : [...m, message]));
+
+  const removeMessage = async (id) => {
+    const prev = messages;
+    setMessages((m) => m.filter((x) => String(x._id) !== String(id))); // optimistic
+    try {
+      await chatApi.deleteMessage(id);
+    } catch (err) {
+      setMessages(prev);
+      toast.error(err.message || 'Could not delete message');
+    }
+  };
+
+  const removeConversation = async (id) => {
+    if (!confirm('Delete this entire chat? This cannot be undone.')) return;
+    try {
+      await chatApi.deleteConversation(id);
+      setConversations((cs) => cs.filter((c) => String(c._id) !== String(id)));
+      setActive(null);
+      activeRef.current = null;
+      setMessages([]);
+      setParams({}, { replace: true });
+      toast.success('Chat deleted');
+    } catch (err) {
+      toast.error(err.message || 'Could not delete chat');
+    }
+  };
 
   const openConversation = async (id, list = conversations) => {
     setActive(list.find((c) => c._id === id) || { _id: id });
@@ -87,11 +139,11 @@ export default function Messages() {
     setText('');
     if (socket) {
       socket.emit('message:send', { conversationId: active._id, body }, (res) => {
-        if (res?.ok) setMessages((m) => [...m, res.message]);
+        if (res?.ok) addMessage(res.message);
       });
     } else {
       const { message } = await chatApi.send(active._id, { body });
-      setMessages((m) => [...m, message]);
+      addMessage(message);
     }
   };
 
@@ -147,36 +199,52 @@ export default function Messages() {
       <div className={`card flex flex-col overflow-hidden ${active ? 'flex' : 'hidden md:flex'}`}>
         {active ? (
           <>
-            <div className="flex items-center gap-3 border-b border-slate-100 px-4 py-3">
+            <div className="flex items-center gap-3 border-b border-ink-200 px-4 py-3">
               <button className="md:hidden" onClick={() => { setActive(null); activeRef.current = null; }}><IconArrowLeft className="h-5 w-5 text-ink-500" /></button>
               <Avatar name={other(active)?.name} size={36} />
-              <div>
-                <div className="font-semibold text-slate-800">{other(active)?.name || 'Conversation'}</div>
-                {active.campaign?.title && <div className="text-xs text-slate-400">{active.campaign.title}</div>}
+              <div className="min-w-0 flex-1">
+                <div className="truncate font-semibold text-ink-900">{other(active)?.name || 'Conversation'}</div>
+                {active.campaign?.title && <div className="truncate text-xs text-ink-400">{active.campaign.title}</div>}
               </div>
+              <button
+                onClick={() => removeConversation(active._id)}
+                title="Delete this chat"
+                className="rounded-lg p-2 text-ink-400 transition hover:bg-rose-50 hover:text-rose-600"
+              >
+                <IconTrash className="h-4 w-4" />
+              </button>
             </div>
 
-            <div className="flex-1 space-y-2 overflow-y-auto bg-slate-50 p-4">
+            <div className="flex-1 space-y-2 overflow-y-auto bg-paper p-4">
               {loadingMsgs ? (
                 <div className="flex h-full items-center justify-center"><Spinner /></div>
               ) : (
                 messages.map((m) => {
                   const mine = String(m.sender?._id || m.sender) === String(user._id);
                   return (
-                    <div key={m._id} className={`flex ${mine ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${mine ? 'bg-brand-600 text-white' : 'bg-white text-slate-700 shadow-sm'}`}>
+                    <div key={m._id} className={`group flex items-center gap-1.5 ${mine ? 'justify-end' : 'justify-start'}`}>
+                      {mine && (
+                        <button
+                          onClick={() => removeMessage(m._id)}
+                          title="Delete message"
+                          className="rounded-md p-1 text-ink-300 opacity-0 transition hover:text-rose-600 group-hover:opacity-100"
+                        >
+                          <IconTrash className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      <div className={`max-w-[75%] rounded-2xl px-3.5 py-2 text-sm ${mine ? 'bg-ink-900 text-paper' : 'border border-ink-200 bg-surface text-ink-800'}`}>
                         {m.body}
-                        <div className={`mt-0.5 text-[10px] ${mine ? 'text-white/60' : 'text-slate-400'}`}>{timeAgo(m.createdAt)}</div>
+                        <div className={`mt-0.5 text-[10px] ${mine ? 'text-paper/50' : 'text-ink-400'}`}>{timeAgo(m.createdAt)}</div>
                       </div>
                     </div>
                   );
                 })
               )}
-              {typing && <div className="text-xs text-slate-400">typing…</div>}
+              {typing && <div className="text-xs text-ink-400">typing…</div>}
               <div ref={endRef} />
             </div>
 
-            <form onSubmit={send} className="flex items-center gap-2 border-t border-slate-100 p-3 safe-bottom">
+            <form onSubmit={send} className="flex items-center gap-2 border-t border-ink-200 p-3 safe-bottom">
               <input
                 className="input flex-1"
                 placeholder="Type a message…"
