@@ -6,7 +6,12 @@ import { Application } from '../models/Application.js';
 import { Review } from '../models/Review.js';
 import { User } from '../models/User.js';
 import { Collaboration } from '../models/Collaboration.js';
-import { tierFor } from '../utils/tiers.js';
+import { tierFor, freePlanStatus } from '../utils/tiers.js';
+import {
+  hasAcceptedCollaboration,
+  sanitizeCreatorProfile,
+  maskedContact,
+} from '../utils/privacy.js';
 
 // GET /api/creator/me
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -123,38 +128,54 @@ export const getDashboard = asyncHandler(async (req, res) => {
     success: true,
     stats: { applicationsSent, accepted, pending, completedCollabs },
     tier: tierFor(completedCollabs),
+    freePlan: freePlanStatus(completedCollabs),
     recentApplications,
   });
 });
 
 // GET /api/creator/:id  (public profile — as seen by a company)
 export const getPublicCreator = asyncHandler(async (req, res) => {
-  const profile = await CreatorProfile.findOne({ user: req.params.id }).populate(
-    'user',
-    'name isAdminVerified createdAt'
-  );
-  if (!profile) throw ApiError.notFound('Creator not found');
+  const doc = await CreatorProfile.findOne({ user: req.params.id })
+    .populate('user', 'name isAdminVerified createdAt email phone')
+    .lean();
+  if (!doc) throw ApiError.notFound('Creator not found');
+
   const reviews = await Review.find({ subject: req.params.id })
     .sort('-createdAt')
     .limit(20)
     .populate('author', 'name')
     .lean();
-  // Completed on-platform collaborations drive the creator's public tier badge
+
   const completed = await Collaboration.countDocuments({
     creator: req.params.id,
     status: 'completed',
   });
-  res.json({ success: true, profile, reviews, tier: tierFor(completed) });
+
+  // Contact details only after a mutually accepted collaboration (§4, §16)
+  const unlocked =
+    req.user?.role === 'admin' || (await hasAcceptedCollaboration(req.user?._id, req.params.id));
+
+  res.json({
+    success: true,
+    profile: sanitizeCreatorProfile(doc, unlocked),
+    contactUnlocked: unlocked,
+    contact: unlocked
+      ? { email: doc.user?.email, phone: doc.user?.phone }
+      : maskedContact(doc.user),
+    reviews,
+    tier: tierFor(completed),
+  });
 });
 
 // GET /api/creator  (search creators — used by companies for Method Two/invitations)
 export const searchCreators = asyncHandler(async (req, res) => {
-  const { q, city, country, platform, minFollowers, maxFollowers, category, page = 1, limit = 12 } =
+  const { q, city, state, country, platform, minFollowers, maxFollowers, category, page = 1, limit = 12 } =
     req.query;
   const filter = {};
   if (q) filter.$or = [{ fullName: new RegExp(q, 'i') }, { username: new RegExp(q, 'i') }];
-  if (city) filter.city = new RegExp(`^${city}$`, 'i');
-  if (country) filter.country = new RegExp(`^${country}$`, 'i');
+  if (city) filter.city = new RegExp(city, 'i');
+  if (state) filter.state = new RegExp(state, 'i');
+  if (country) filter.country = new RegExp(country, 'i');
   if (category) filter.categories = category;
   if (platform) filter['socials.platform'] = platform;
   if (minFollowers || maxFollowers) {
@@ -174,9 +195,14 @@ export const searchCreators = asyncHandler(async (req, res) => {
     CreatorProfile.countDocuments(filter),
   ]);
 
+  // Search results never expose handles/contact — discovery is allowed, contact is not (§4)
+  const visible = items
+    .filter((c) => c.user && c.user.status === 'active')
+    .map((c) => sanitizeCreatorProfile(c, false));
+
   res.json({
     success: true,
-    items: items.filter((c) => c.user && c.user.status === 'active'),
+    items: visible,
     total,
     page: Number(page),
     pages: Math.ceil(total / Number(limit)),

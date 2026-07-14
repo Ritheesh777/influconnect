@@ -1,13 +1,21 @@
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/apiError.js';
 import { Application } from '../models/Application.js';
-import { Campaign } from '../models/Campaign.js';
+import { Campaign, rangesForFollowerCount } from '../models/Campaign.js';
+import { CreatorProfile } from '../models/CreatorProfile.js';
 import { Collaboration } from '../models/Collaboration.js';
 import { Conversation } from '../models/Conversation.js';
 import { notify } from '../utils/notify.js';
 
-/** Finds or creates the conversation between company & creator for a campaign. */
-async function ensureConversation({ campaign, company, creator, application }) {
+/**
+ * Creates the private conversation for a collaboration.
+ *
+ * BUSINESS RULE (v1 change request §1, §6): chat unlocks ONLY once both sides
+ * have agreed — i.e. a company accepts an application, or a creator accepts an
+ * invitation. It must NOT be created merely because someone applied/invited,
+ * otherwise the parties could talk (and swap contacts) before agreeing.
+ */
+async function ensureConversation({ campaign, company, creator, application, collaboration }) {
   let convo = await Conversation.findOne({
     campaign,
     participants: { $all: [company, creator] },
@@ -16,9 +24,13 @@ async function ensureConversation({ campaign, company, creator, application }) {
     convo = await Conversation.create({
       campaign,
       application,
+      collaboration,
       participants: [company, creator],
       unread: {},
     });
+  } else if (collaboration && !convo.collaboration) {
+    convo.collaboration = collaboration;
+    await convo.save();
   }
   return convo;
 }
@@ -29,6 +41,17 @@ export const applyToCampaign = asyncHandler(async (req, res) => {
   const campaign = await Campaign.findById(campaignId);
   if (!campaign) throw ApiError.notFound('Campaign not found');
   if (campaign.status !== 'active') throw ApiError.badRequest('Campaign is not accepting applications');
+
+  // §8 — creators may only apply to campaigns matching their follower range
+  const myProfile = await CreatorProfile.findOne({ user: req.user._id })
+    .select('totalFollowers')
+    .lean();
+  const eligible = rangesForFollowerCount(myProfile?.totalFollowers || 0);
+  if (campaign.followerRange && !eligible.includes(campaign.followerRange)) {
+    throw ApiError.forbidden(
+      `This campaign requires ${campaign.followerRange} followers. Your profile doesn't match that range.`
+    );
+  }
 
   const existing = await Application.findOne({ campaign: campaignId, creator: req.user._id });
   if (existing && existing.status !== 'withdrawn')
@@ -53,13 +76,8 @@ export const applyToCampaign = asyncHandler(async (req, res) => {
     await Campaign.updateOne({ _id: campaignId }, { $inc: { applicationsCount: 1 } });
   }
 
-  // Business rule: chat unlocks once an application is submitted
-  await ensureConversation({
-    campaign: campaign._id,
-    company: campaign.company,
-    creator: req.user._id,
-    application: application._id,
-  });
+  // NOTE: no conversation is created here. Chat stays locked until the company
+  // accepts (v1 change request §2, §6).
 
   await notify({
     user: campaign.company,
@@ -99,12 +117,7 @@ export const inviteCreator = asyncHandler(async (req, res) => {
     await existing.save();
   }
 
-  await ensureConversation({
-    campaign: campaign._id,
-    company: req.user._id,
-    creator: creatorId,
-    application: application._id,
-  });
+  // No conversation yet — the creator must accept the invitation first (§2, §6).
 
   await notify({
     user: creatorId,
@@ -159,11 +172,19 @@ export const decideApplication = asyncHandler(async (req, res) => {
   await application.save();
 
   if (decision === 'accepted') {
-    await Collaboration.create({
+    // Mutual agreement reached → create the collaboration AND unlock chat (§3, §6)
+    const collab = await Collaboration.create({
       campaign: application.campaign._id,
       application: application._id,
       company: application.company,
       creator: application.creator,
+    });
+    await ensureConversation({
+      campaign: application.campaign._id,
+      company: application.company,
+      creator: application.creator,
+      application: application._id,
+      collaboration: collab._id,
     });
     await Campaign.updateOne({ _id: application.campaign._id }, { $inc: { acceptedCount: 1 } });
   }
@@ -192,11 +213,19 @@ export const respondToInvitation = asyncHandler(async (req, res) => {
     application.status = 'accepted';
     application.respondedAt = new Date();
     await application.save();
-    await Collaboration.create({
+    // Creator accepted the invitation → collaboration + chat unlock (§3, §6)
+    const collab = await Collaboration.create({
       campaign: application.campaign._id,
       application: application._id,
       company: application.company,
       creator: application.creator,
+    });
+    await ensureConversation({
+      campaign: application.campaign._id,
+      company: application.company,
+      creator: application.creator,
+      application: application._id,
+      collaboration: collab._id,
     });
     await Campaign.updateOne({ _id: application.campaign._id }, { $inc: { acceptedCount: 1 } });
   } else {

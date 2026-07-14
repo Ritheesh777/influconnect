@@ -45,7 +45,11 @@ const NAVS = {
 };
 
 export default function DashboardLayout() {
-  const { user, logout } = useAuth();
+  const { user, profile, logout } = useAuth();
+  // §10 — nav shows the company logo / creator photo, and opens that profile
+  const avatarSrc = profile?.logoUrl || profile?.avatarUrl || '';
+  const profileHref =
+    user?.role === 'company' ? '/company/profile' : user?.role === 'creator' ? '/creator/profile' : '/admin';
   const { unreadNotifications } = useSocket();
   const navigate = useNavigate();
   const location = useLocation();
@@ -152,10 +156,14 @@ export default function DashboardLayout() {
                 </span>
               )}
             </Link>
-            <div className="flex items-center gap-2">
-              <Avatar src={user?.avatarUrl} name={user?.name} size={34} />
+            <Link
+              to={profileHref}
+              className="flex items-center gap-2 rounded-lg p-1 transition hover:bg-ink-100"
+              title="Open my profile"
+            >
+              <Avatar src={avatarSrc} name={user?.name} size={34} ring />
               <span className="hidden max-w-[140px] truncate text-sm font-medium text-ink-700 sm:block">{user?.name}</span>
-            </div>
+            </Link>
           </div>
         </header>
 

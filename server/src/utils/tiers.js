@@ -16,6 +16,28 @@ export const CREATOR_TIERS = [
   { key: 'elite', name: 'Elite', min: 21, max: Infinity, discountPercent: 45 },
 ];
 
+/**
+ * Free-plan policy (§11): a creator gets 3 successful collaborations free.
+ * After the 3rd, they must subscribe to apply for new collaborations.
+ * Subscriptions are NOT charged in v1 — this reports the quota so the UI can
+ * warn users and the rule can be switched on in v2 without a redesign.
+ */
+export const FREE_COLLAB_LIMIT = 3;
+export const SUBSCRIPTION_ENFORCED = false; // flip to true when billing ships
+
+export function freePlanStatus(completedCount = 0) {
+  const used = Number(completedCount) || 0;
+  const remaining = Math.max(0, FREE_COLLAB_LIMIT - used);
+  return {
+    limit: FREE_COLLAB_LIMIT,
+    used,
+    remaining,
+    requiresSubscription: used >= FREE_COLLAB_LIMIT,
+    enforced: SUBSCRIPTION_ENFORCED,
+    firstSubscriptionDiscount: 50, // §12 — new creators get 50% off their first plan
+  };
+}
+
 export function tierFor(completedCount = 0) {
   const n = Number(completedCount) || 0;
   const tier = CREATOR_TIERS.find((t) => n >= t.min && n <= t.max) || CREATOR_TIERS[0];

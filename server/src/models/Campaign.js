@@ -3,14 +3,19 @@ import mongoose from 'mongoose';
 const { Schema } = mongoose;
 
 export const CAMPAIGN_CATEGORIES = [
+  'Food',
   'Restaurant',
-  'Fashion',
-  'Beauty',
   'Travel',
-  'Gaming',
-  'Tech',
+  'Lifestyle',
+  'Fashion',
   'Fitness',
+  'Gaming',
   'Education',
+  'Technology',
+  'Family',
+  'Couple',
+  'Comedy',
+  'Beauty',
   'Other',
 ];
 
@@ -24,13 +29,37 @@ export const CAMPAIGN_TYPES = [
 ];
 
 export const FOLLOWER_RANGES = [
+  '0-500',
+  '500-1K',
   '1K-5K',
   '5K-10K',
   '10K-25K',
   '25K-50K',
   '50K-100K',
-  '100K+',
+  '100K-500K',
+  '500K+',
 ];
+
+/** Each range's real numeric bounds — used to match creators to campaigns (§8). */
+export const FOLLOWER_RANGE_BOUNDS = {
+  '0-500': [0, 500],
+  '500-1K': [500, 1000],
+  '1K-5K': [1000, 5000],
+  '5K-10K': [5000, 10000],
+  '10K-25K': [10000, 25000],
+  '25K-50K': [25000, 50000],
+  '50K-100K': [50000, 100000],
+  '100K-500K': [100000, 500000],
+  '500K+': [500000, Infinity],
+};
+
+/** Ranges a creator with `count` followers qualifies for. */
+export function rangesForFollowerCount(count = 0) {
+  const n = Number(count) || 0;
+  return Object.entries(FOLLOWER_RANGE_BOUNDS)
+    .filter(([, [min, max]]) => n >= min && n < (max === Infinity ? Infinity : max))
+    .map(([key]) => key);
+}
 
 const campaignSchema = new Schema(
   {

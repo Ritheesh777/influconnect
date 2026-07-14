@@ -31,7 +31,7 @@ export function AuthProvider({ children }) {
   const handleAuth = ({ token, user }) => {
     setAuthToken(token);
     setUser(user);
-    // profile fetched lazily via refresh() where needed
+    loadMe(); // pull the profile so the nav avatar (logo/photo) is available (§10)
     return user;
   };
 

@@ -5,6 +5,8 @@ import { Campaign } from '../models/Campaign.js';
 import { CompanyProfile } from '../models/CompanyProfile.js';
 import { Application } from '../models/Application.js';
 import { SavedCampaign } from '../models/SavedCampaign.js';
+import { CreatorProfile } from '../models/CreatorProfile.js';
+import { rangesForFollowerCount } from '../models/Campaign.js';
 
 // POST /api/campaigns  (company)
 export const createCampaign = asyncHandler(async (req, res) => {
@@ -55,6 +57,13 @@ export const browseCampaigns = asyncHandler(async (req, res) => {
   if (campaignType) filter.campaignType = campaignType;
   if (followerRange) filter.followerRange = followerRange;
   if (platform) filter.platforms = platform;
+
+  // §8 — a creator only sees campaigns their follower count qualifies for.
+  // (`all=1` lets them deliberately browse everything.)
+  if (req.user?.role === 'creator' && req.query.all !== '1' && !followerRange) {
+    const me = await CreatorProfile.findOne({ user: req.user._id }).select('totalFollowers').lean();
+    filter.followerRange = { $in: rangesForFollowerCount(me?.totalFollowers || 0) };
+  }
   if (city) filter.city = new RegExp(`^${city}$`, 'i');
   if (country) filter.$or = [{ country: new RegExp(`^${country}$`, 'i') }, { isWorldwide: true }];
 

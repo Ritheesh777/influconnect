@@ -2,11 +2,34 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/apiError.js';
 import { Conversation } from '../models/Conversation.js';
 import { Message } from '../models/Message.js';
+import { Collaboration } from '../models/Collaboration.js';
 import { emitToUser } from '../sockets/registry.js';
 import { notify } from '../utils/notify.js';
 
 function isParticipant(convo, userId) {
   return convo.participants.some((p) => String(p._id || p) === String(userId));
+}
+
+/**
+ * §6 Chat unlock rule — a conversation is only usable once it is backed by an
+ * accepted collaboration. Enforced on every read/write so no client can talk
+ * its way past the rule.
+ */
+async function assertUnlocked(convo) {
+  const collab = convo.collaboration
+    ? await Collaboration.findById(convo.collaboration).lean()
+    : await Collaboration.findOne({
+        campaign: convo.campaign,
+        company: convo.participants[0],
+        creator: convo.participants[1],
+      }).lean();
+  const ok =
+    collab && ['active', 'completed'].includes(collab.status);
+  if (!ok)
+    throw ApiError.forbidden(
+      'Chat unlocks only after the collaboration is accepted by both parties.'
+    );
+  return collab;
 }
 
 // GET /api/chat/conversations
@@ -16,11 +39,23 @@ export const getConversations = asyncHandler(async (req, res) => {
     .populate('participants', 'name role')
     .populate('campaign', 'title')
     .lean();
-  const items = convos.map((c) => ({
-    ...c,
-    unreadCount: c.unread?.[String(req.user._id)] || 0,
-    otherParty: c.participants.find((p) => String(p._id) !== String(req.user._id)),
-  }));
+
+  // Only surface threads backed by an accepted collaboration (§6)
+  const collabs = await Collaboration.find({
+    _id: { $in: convos.map((c) => c.collaboration).filter(Boolean) },
+    status: { $in: ['active', 'completed'] },
+  })
+    .select('_id')
+    .lean();
+  const unlockedIds = new Set(collabs.map((c) => String(c._id)));
+
+  const items = convos
+    .filter((c) => c.collaboration && unlockedIds.has(String(c.collaboration)))
+    .map((c) => ({
+      ...c,
+      unreadCount: c.unread?.[String(req.user._id)] || 0,
+      otherParty: c.participants.find((p) => String(p._id) !== String(req.user._id)),
+    }));
   res.json({ success: true, items });
 });
 
@@ -29,6 +64,7 @@ export const getMessages = asyncHandler(async (req, res) => {
   const convo = await Conversation.findById(req.params.id);
   if (!convo) throw ApiError.notFound('Conversation not found');
   if (!isParticipant(convo, req.user._id)) throw ApiError.forbidden();
+  await assertUnlocked(convo);
 
   const messages = await Message.find({ conversation: convo._id }).sort('createdAt').lean();
 
@@ -48,6 +84,7 @@ export const sendMessage = asyncHandler(async (req, res) => {
   const convo = await Conversation.findById(req.params.id);
   if (!convo) throw ApiError.notFound('Conversation not found');
   if (!isParticipant(convo, req.user._id)) throw ApiError.forbidden();
+  await assertUnlocked(convo);
 
   const message = await Message.create({
     conversation: convo._id,

@@ -1,12 +1,17 @@
 export const CAMPAIGN_CATEGORIES = [
+  'Food',
   'Restaurant',
-  'Fashion',
-  'Beauty',
   'Travel',
-  'Gaming',
-  'Tech',
+  'Lifestyle',
+  'Fashion',
   'Fitness',
+  'Gaming',
   'Education',
+  'Technology',
+  'Family',
+  'Couple',
+  'Comedy',
+  'Beauty',
   'Other',
 ];
 
@@ -19,17 +24,29 @@ export const CAMPAIGN_TYPES = [
   'Brand Ambassador',
 ];
 
-export const FOLLOWER_RANGES = ['1K-5K', '5K-10K', '10K-25K', '25K-50K', '50K-100K', '100K+'];
+export const FOLLOWER_RANGES = [
+  '0-500',
+  '500-1K',
+  '1K-5K',
+  '5K-10K',
+  '10K-25K',
+  '25K-50K',
+  '50K-100K',
+  '100K-500K',
+  '500K+',
+];
 
-// Follower brackets mapped to real min/max numbers, for filtering creators
+// Follower brackets mapped to real min/max numbers, for filtering creators (§7)
 export const FOLLOWER_FILTERS = [
-  { label: 'Under 1K', min: 0, max: 1000 },
+  { label: '0 – 500', min: 0, max: 500 },
+  { label: '500 – 1K', min: 500, max: 1000 },
   { label: '1K – 5K', min: 1000, max: 5000 },
   { label: '5K – 10K', min: 5000, max: 10000 },
   { label: '10K – 25K', min: 10000, max: 25000 },
   { label: '25K – 50K', min: 25000, max: 50000 },
   { label: '50K – 100K', min: 50000, max: 100000 },
-  { label: '100K+', min: 100000, max: '' },
+  { label: '100K – 500K', min: 100000, max: 500000 },
+  { label: '500K+', min: 500000, max: '' },
 ];
 
 export const PLATFORMS = ['instagram', 'youtube', 'tiktok', 'facebook'];

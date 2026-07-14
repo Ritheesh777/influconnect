@@ -7,6 +7,11 @@ import { Application } from '../models/Application.js';
 import { Collaboration } from '../models/Collaboration.js';
 import { Review } from '../models/Review.js';
 import { User } from '../models/User.js';
+import {
+  hasAcceptedCollaboration,
+  sanitizeCompanyProfile,
+  maskedContact,
+} from '../utils/privacy.js';
 
 // GET /api/company/me
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -101,15 +106,28 @@ export const getDashboard = asyncHandler(async (req, res) => {
 
 // GET /api/company/:id  (public profile view, e.g. shown to creators)
 export const getPublicCompany = asyncHandler(async (req, res) => {
-  const profile = await CompanyProfile.findOne({ user: req.params.id }).populate(
-    'user',
-    'name isAdminVerified createdAt'
-  );
-  if (!profile) throw ApiError.notFound('Company not found');
+  const doc = await CompanyProfile.findOne({ user: req.params.id })
+    .populate('user', 'name isAdminVerified createdAt email phone')
+    .lean();
+  if (!doc) throw ApiError.notFound('Company not found');
+
   const reviews = await Review.find({ subject: req.params.id })
     .sort('-createdAt')
     .limit(20)
     .populate('author', 'name')
     .lean();
-  res.json({ success: true, profile, reviews });
+
+  // Website/address/contact stay hidden until collaboration is accepted (§4, §16)
+  const unlocked =
+    req.user?.role === 'admin' || (await hasAcceptedCollaboration(req.user?._id, req.params.id));
+
+  res.json({
+    success: true,
+    profile: sanitizeCompanyProfile(doc, unlocked),
+    contactUnlocked: unlocked,
+    contact: unlocked
+      ? { email: doc.user?.email, phone: doc.user?.phone }
+      : maskedContact(doc.user),
+    reviews,
+  });
 });

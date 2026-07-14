@@ -5,6 +5,7 @@ import { useAsync } from '../../hooks/useAsync.js';
 import { creatorApi, campaignApi, applicationApi } from '../../api/endpoints.js';
 import { PageLoader, Avatar, StarRating, Modal, EmptyState } from '../../components/ui.jsx';
 import Linkify from '../../components/Linkify.jsx';
+import LockedContact from '../../components/LockedContact.jsx';
 import { compactNumber } from '../../utils/format.js';
 import { socialUrl } from '../../utils/social.js';
 import { PLATFORM_LABELS } from '../../utils/constants.js';
@@ -24,7 +25,7 @@ export default function CreatorView() {
   if (loading) return <PageLoader />;
   if (!data?.profile) return <EmptyState icon={IconUser} title="Creator not found" />;
 
-  const { profile, reviews } = data;
+  const { profile, reviews, contactUnlocked, contact } = data;
 
   const openInvite = async () => {
     setInviteOpen(true);
@@ -81,12 +82,17 @@ export default function CreatorView() {
         </div>
       </div>
 
+      {/* Contact stays locked until the collaboration is accepted (§5) */}
+      {!contactUnlocked && (
+        <LockedContact contact={contact} socials={profile.socials} role="creator" />
+      )}
+
       <Section title="Social Accounts">
         {profile.socials?.length ? (
           <div className="grid gap-3 sm:grid-cols-2">
             {profile.socials.map((s) => {
               const PIcon = PLATFORM_ICON[s.platform] || PLATFORM_ICON.default;
-              const url = socialUrl(s.platform, s.username);
+              const url = contactUnlocked ? socialUrl(s.platform, s.username) : '';
               return (
                 <div key={s._id || s.platform} className="card p-4">
                   <div className="flex items-center justify-between">
@@ -105,7 +111,9 @@ export default function CreatorView() {
                       @{String(s.username).replace(/^@/, '')} <IconExternal className="h-3 w-3" />
                     </a>
                   ) : (
-                    <div className="mt-1 text-sm text-ink-500">@{s.username}</div>
+                    <div className="mt-1 select-none font-mono text-sm text-ink-400 blur-[3px]" aria-hidden="true">
+                      @************
+                    </div>
                   )}
                   <div className="mt-3 flex gap-4 text-sm">
                     <div><span className="font-bold text-ink-900">{compactNumber(s.followers)}</span> <span className="text-ink-400">followers</span></div>
@@ -139,7 +147,7 @@ export default function CreatorView() {
         ) : (
           <p className="text-sm text-ink-400">No portfolio items yet.</p>
         )}
-        {profile.mediaKitUrl && (
+        {contactUnlocked && profile.mediaKitUrl && (
           <a href={profile.mediaKitUrl} target="_blank" rel="noreferrer" className="btn-outline mt-3"><IconFile className="h-4 w-4" /> View Media Kit</a>
         )}
       </Section>

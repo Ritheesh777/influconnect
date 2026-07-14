@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { protect } from '../middleware/auth.js';
+import { protect, optionalAuth } from '../middleware/auth.js';
 import { authorize } from '../middleware/roles.js';
 import { upload } from '../middleware/upload.js';
 import * as company from '../controllers/companyController.js';
@@ -16,6 +16,6 @@ router.patch(
   company.updateMedia
 );
 router.get('/dashboard', protect, authorize('company'), company.getDashboard);
-router.get('/:id', company.getPublicCompany);
+router.get('/:id', optionalAuth, company.getPublicCompany);
 
 export default router;

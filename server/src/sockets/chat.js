@@ -2,8 +2,17 @@ import { verifyToken } from '../utils/token.js';
 import { User } from '../models/User.js';
 import { Conversation } from '../models/Conversation.js';
 import { Message } from '../models/Message.js';
+import { Collaboration } from '../models/Collaboration.js';
 import { setIO, addOnline, removeOnline, emitToUser } from './registry.js';
 import { notify } from '../utils/notify.js';
+
+/** §6 — a conversation is only usable once its collaboration is accepted. */
+async function isUnlocked(convo) {
+  const collab = convo.collaboration
+    ? await Collaboration.findById(convo.collaboration).lean()
+    : await Collaboration.findOne({ campaign: convo.campaign, application: convo.application }).lean();
+  return Boolean(collab && ['active', 'completed'].includes(collab.status));
+}
 
 export function initChat(io) {
   setIO(io);
@@ -47,6 +56,12 @@ export function initChat(io) {
         const convo = await Conversation.findById(conversationId);
         if (!convo || !convo.participants.some((p) => String(p) === userId)) {
           return ack?.({ ok: false, error: 'Not allowed' });
+        }
+        if (!(await isUnlocked(convo))) {
+          return ack?.({
+            ok: false,
+            error: 'Chat unlocks only after the collaboration is accepted by both parties.',
+          });
         }
         const message = await Message.create({
           conversation: convo._id,
