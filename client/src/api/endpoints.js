@@ -117,6 +117,17 @@ export const mediaApi = {
   },
 };
 
+// ── Subscriptions (Razorpay) ──────────────────────────
+export const subscriptionApi = {
+  plans: () => api.get('/subscriptions/plans').then((r) => r.data),
+  quote: (planCode, couponCode) =>
+    api.post('/subscriptions/quote', { planCode, couponCode }).then((r) => r.data),
+  checkout: (planCode, couponCode) =>
+    api.post('/subscriptions/checkout', { planCode, couponCode }).then((r) => r.data),
+  verify: (payload) => api.post('/subscriptions/verify', payload).then((r) => r.data),
+  me: () => api.get('/subscriptions/me').then((r) => r.data),
+};
+
 // ── Admin ─────────────────────────────────────────────
 export const adminApi = {
   dashboard: () => api.get('/admin/dashboard').then((r) => r.data),

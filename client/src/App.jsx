@@ -48,6 +48,7 @@ const Messages = lazy(() => import('./pages/shared/Messages.jsx'));
 const Notifications = lazy(() => import('./pages/shared/Notifications.jsx'));
 const Reviews = lazy(() => import('./pages/shared/Reviews.jsx'));
 const Settings = lazy(() => import('./pages/shared/Settings.jsx'));
+const Subscribe = lazy(() => import('./pages/shared/Subscribe.jsx'));
 
 const AdminDashboard = lazy(() => import('./pages/admin/Dashboard.jsx'));
 const ManageUsers = lazy(() => import('./pages/admin/ManageUsers.jsx'));
@@ -144,6 +145,7 @@ export default function App() {
             <Route path="/notifications" element={<Notifications />} />
             <Route path="/reviews" element={<Reviews />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/subscribe" element={<Subscribe />} />
           </Route>
 
           {/* Admin */}

@@ -9,7 +9,7 @@ import { motion } from '../lib/motion.jsx';
 import {
   IconDashboard, IconCampaign, IconPlusCircle, IconInbox, IconSearch, IconMessage,
   IconBell, IconStar, IconCompany, IconUser, IconSettings, IconLogout, IconUsers,
-  IconFlag, IconSend, IconBookmark, IconMenu, IconX,
+  IconFlag, IconSend, IconBookmark, IconMenu, IconX, IconSparkles,
 } from '../components/icons.jsx';
 
 const NAVS = {
@@ -22,6 +22,7 @@ const NAVS = {
     { to: '/messages', label: 'Messages', icon: IconMessage },
     { to: '/notifications', label: 'Notifications', icon: IconBell },
     { to: '/reviews', label: 'Reviews', icon: IconStar },
+    { to: '/subscribe', label: 'Subscription', icon: IconSparkles },
     { to: '/company/profile', label: 'Profile', icon: IconCompany },
     { to: '/settings', label: 'Settings', icon: IconSettings },
   ],
@@ -33,6 +34,7 @@ const NAVS = {
     { to: '/messages', label: 'Messages', icon: IconMessage },
     { to: '/notifications', label: 'Notifications', icon: IconBell },
     { to: '/reviews', label: 'Reviews', icon: IconStar },
+    { to: '/subscribe', label: 'Subscription', icon: IconSparkles },
     { to: '/creator/profile', label: 'Profile', icon: IconUser },
     { to: '/settings', label: 'Settings', icon: IconSettings },
   ],

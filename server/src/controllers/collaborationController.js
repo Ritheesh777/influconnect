@@ -2,6 +2,7 @@ import { asyncHandler } from '../utils/asyncHandler.js';
 import { ApiError } from '../utils/apiError.js';
 import { Collaboration } from '../models/Collaboration.js';
 import { notify } from '../utils/notify.js';
+import { snapshotRanking } from '../utils/ranking.js';
 
 // GET /api/collaborations  (mine — either side)
 export const getMyCollaborations = asyncHandler(async (req, res) => {
@@ -29,6 +30,13 @@ export const completeCollaboration = asyncHandler(async (req, res) => {
   collab.status = 'completed';
   collab.completedAt = new Date();
   await collab.save();
+
+  // §14 — snapshot each side's monthly rank. The live counter resets each month
+  // but these rows persist, so history is never lost (BR-NEW-011).
+  await Promise.all([
+    snapshotRanking(collab.company, 'company'),
+    snapshotRanking(collab.creator, 'creator'),
+  ]);
 
   const other =
     String(collab.company) === String(req.user._id) ? collab.creator : collab.company;

@@ -18,6 +18,11 @@ export const env = {
     email: process.env.ADMIN_EMAIL || 'admin@influconnect.com',
     password: process.env.ADMIN_PASSWORD || 'Admin@12345',
   },
+  razorpay: {
+    keyId: process.env.RAZORPAY_KEY_ID || '',
+    keySecret: process.env.RAZORPAY_KEY_SECRET || '',
+    webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
+  },
 };
 
 export const isCloudinaryConfigured = () =>

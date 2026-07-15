@@ -13,6 +13,8 @@ import chatRoutes from './routes/chatRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
+import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import { razorpayWebhook } from './controllers/subscriptionController.js';
 import {
   savedRouter,
   collabRouter,
@@ -36,6 +38,15 @@ export function createApp() {
       credentials: true,
     })
   );
+  // Razorpay's webhook signature is computed over the RAW body — parsing it as
+  // JSON first would change the bytes and every signature check would fail.
+  // This must be registered before express.json().
+  app.post(
+    '/api/subscriptions/webhook',
+    express.raw({ type: 'application/json' }),
+    razorpayWebhook
+  );
+
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
   // Log requests in every environment — without this, production errors are invisible.
@@ -58,6 +69,7 @@ export function createApp() {
   app.use('/api/complaints', complaintRouter);
   app.use('/api/media', mediaRouter);
   app.use('/api/public', publicRouter);
+  app.use('/api/subscriptions', subscriptionRoutes);
   app.use('/api/admin', adminRoutes);
 
   app.use(notFound);

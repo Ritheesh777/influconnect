@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { IconHandshake, IconSparkles } from './icons.jsx';
 
 /**
@@ -64,11 +65,16 @@ export default function QuotaCard({ quota, role = 'creator' }) {
             </p>
           </div>
         </div>
-        {done && quota.firstSubscriptionDiscount > 0 && (
-          <span className="badge shrink-0 bg-brand-50 text-brand-700">
-            {quota.firstSubscriptionDiscount}% off your first plan
-          </span>
-        )}
+        <div className="flex shrink-0 items-center gap-2">
+          {quota.firstSubscriptionDiscount > 0 && (
+            <span className="badge bg-brand-50 text-brand-700">
+              {quota.firstSubscriptionDiscount}% off your first plan
+            </span>
+          )}
+          <Link to="/subscribe" className={done ? 'btn-brand' : 'btn-outline'}>
+            {done ? 'Subscribe now' : 'View plans'}
+          </Link>
+        </div>
       </div>
 
       <div className="mt-3 h-2 overflow-hidden rounded-full bg-ink-100">
