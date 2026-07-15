@@ -185,6 +185,7 @@ export default function AdminPlans() {
                 perUserLimit: 1,
                 usageLimit: '',
                 isActive: true,
+                overridesCap: false,
               })
             }
           >
@@ -203,6 +204,9 @@ export default function AdminPlans() {
                   <span className="badge bg-emerald-50 text-emerald-700">
                     {c.type === 'percent' ? `${c.value}% off` : `${rupees(c.value)} off`}
                   </span>
+                  {c.overridesCap && (
+                    <span className="badge bg-amber-100 text-amber-800">Ignores cap</span>
+                  )}
                   {!c.isActive && <span className="badge bg-ink-200 text-ink-600">Inactive</span>}
                 </div>
                 <div className="mt-0.5 text-xs text-ink-500">
@@ -302,6 +306,25 @@ function CouponForm({ c, setC, onSave, onCancel }) {
           </div>
         </div>
       </div>
+      {/* §11 — the cap is what stops stacked discounts going free by accident.
+          Overriding it is a deliberate act, so it is opt-in and spelled out. */}
+      <label className="mt-3 flex cursor-pointer items-start gap-2.5 rounded-lg border border-ink-200 bg-surface p-3">
+        <input
+          type="checkbox"
+          className="mt-0.5 h-4 w-4 shrink-0 accent-brand-600"
+          checked={!!c.overridesCap}
+          onChange={(e) => setC({ ...c, overridesCap: e.target.checked })}
+        />
+        <span className="text-sm">
+          <span className="font-medium text-ink-900">Ignore the combined discount cap</span>
+          <span className="mt-0.5 block text-xs leading-relaxed text-ink-500">
+            Lets this coupon discount beyond the cap — up to 100%. Use for a ₹1 payment test. The
+            price still floors at ₹1 because Razorpay rejects zero-amount orders. Deactivate the
+            coupon before launch.
+          </span>
+        </span>
+      </label>
+
       <div className="mt-3 flex gap-2">
         <button className="btn-primary" disabled={!c.code} onClick={() => onSave(c)}>Create coupon</button>
         <button className="btn-ghost" onClick={onCancel}>Cancel</button>

@@ -19,6 +19,19 @@ const couponSchema = new Schema(
     perUserLimit: { type: Number, default: 1 },
     usedCount: { type: Number, default: 0 },
     minAmountPaise: { type: Number, default: 0 },
+
+    /**
+     * Lets this coupon exceed the combined discount cap (§11).
+     *
+     * §11 requires a cap so stacked discounts cannot *unintentionally* make a
+     * subscription free. An administrator deliberately issuing a full-discount
+     * coupon is intentional, so it is allowed — but only per-coupon and opt-in,
+     * so the cap keeps protecting every other checkout.
+     *
+     * Even at 100% the price still floors at `minChargeablePaise`: Razorpay
+     * rejects a zero-amount order, so a truly ₹0 checkout cannot exist.
+     */
+    overridesCap: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

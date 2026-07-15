@@ -92,14 +92,22 @@ export async function quotePrice({ user, plan, couponCode }) {
     }
   }
 
-  // Percentages stack, then get capped (§11)
+  // Percentages stack, then get capped (§11). A coupon flagged `overridesCap`
+  // is an explicit admin decision (e.g. a ₹1 live-rail test), so it lifts the
+  // ceiling to 100% for this checkout only — never above it, and never below
+  // the minimum chargeable amount enforced further down.
+  const ceiling = coupon?.overridesCap ? 100 : cfg.maxCombinedPercent;
   const rawPercent = first + rankPercent + couponPercent;
-  const effectivePercent = Math.min(rawPercent, cfg.maxCombinedPercent);
-  const capped = rawPercent > cfg.maxCombinedPercent;
+  const effectivePercent = Math.min(rawPercent, ceiling);
+  const capped = rawPercent > ceiling;
 
   let amount = Math.round(base * (1 - effectivePercent / 100));
   amount -= couponFixedPaise; // fixed coupons apply after the percentages
-  amount = Math.max(cfg.minChargeablePaise, amount); // never free/negative
+  const beforeFloor = amount;
+  // Never free or negative. Razorpay rejects a zero-amount order outright, so
+  // even a 100% coupon settles at this floor rather than ₹0.
+  amount = Math.max(cfg.minChargeablePaise, amount);
+  const floored = beforeFloor < cfg.minChargeablePaise;
 
   const discount = base - amount;
 
@@ -119,9 +127,15 @@ export async function quotePrice({ user, plan, couponCode }) {
       rankName: rank.name,
       couponPercent,
       couponFixedPaise,
-      cappedAtPercent: capped ? cfg.maxCombinedPercent : 0,
+      // Report the ceiling that actually applied, not the global one, or the UI
+      // would tell an override user "capped at 80%" while charging them ₹1.
+      cappedAtPercent: capped ? ceiling : 0,
       effectivePercent,
-      maxCombinedPercent: cfg.maxCombinedPercent,
+      maxCombinedPercent: ceiling,
+      capOverridden: !!coupon?.overridesCap,
+      // True when the floor — not the percentages — decided the final price.
+      atMinimumCharge: floored,
+      minChargeablePaise: cfg.minChargeablePaise,
     },
     coupon: coupon ? { _id: coupon._id, code: coupon.code, description: coupon.description } : null,
     couponError,

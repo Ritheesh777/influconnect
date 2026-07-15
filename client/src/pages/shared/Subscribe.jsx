@@ -257,6 +257,13 @@ export default function Subscribe() {
                   Combined discounts are capped at {b.maxCombinedPercent}%.
                 </p>
               )}
+              {b.atMinimumCharge && (
+                <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                  Your discount covers the full price, so this is the smallest amount we can charge
+                  (₹{((b.minChargeablePaise ?? 100) / 100).toFixed(2)}) — payments cannot be
+                  processed for ₹0.
+                </p>
+              )}
               <Row label="Total discount" value={`−${rupees(quote.discount)}`} good />
               <div className="flex items-center justify-between border-t border-ink-200 pt-3">
                 <span className="font-semibold text-ink-900">You pay</span>
