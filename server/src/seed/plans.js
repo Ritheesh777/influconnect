@@ -65,13 +65,17 @@ const COUPONS = [
 
 async function run() {
   await connectDB();
+  // $setOnInsert: create when missing, but NEVER overwrite — otherwise a deploy
+  // would silently reset prices/coupons an administrator has since edited.
   for (const p of PLANS) {
-    await SubscriptionPlan.findOneAndUpdate({ code: p.code }, p, { upsert: true, new: true });
-    console.log(`  ✓ plan   ${p.code.padEnd(18)} ₹${(p.pricePaise / 100).toFixed(0)}/${p.interval}`);
+    const r = await SubscriptionPlan.updateOne({ code: p.code }, { $setOnInsert: p }, { upsert: true });
+    const made = r.upsertedCount > 0;
+    console.log(`  ${made ? '✓ created' : '· kept   '} plan   ${p.code.padEnd(18)} ₹${(p.pricePaise / 100).toFixed(0)}/${p.interval}`);
   }
   for (const c of COUPONS) {
-    await Coupon.findOneAndUpdate({ code: c.code }, c, { upsert: true, new: true });
-    console.log(`  ✓ coupon ${c.code.padEnd(18)} ${c.type === 'percent' ? c.value + '%' : '₹' + c.value / 100} off`);
+    const r = await Coupon.updateOne({ code: c.code }, { $setOnInsert: c }, { upsert: true });
+    const made = r.upsertedCount > 0;
+    console.log(`  ${made ? '✓ created' : '· kept   '} coupon ${c.code.padEnd(18)} ${c.type === 'percent' ? c.value + '%' : '₹' + c.value / 100} off`);
   }
   console.log('✅ Plans & coupons ready.');
   await mongoose.disconnect();

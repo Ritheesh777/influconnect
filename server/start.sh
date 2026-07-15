@@ -22,5 +22,10 @@ if [[ -z "$MONGO_URI" || "$MONGO_URI" == *"127.0.0.1"* || "$MONGO_URI" == *"loca
   node src/seed/seed.js || echo "→ seed skipped/failed (continuing)"
 fi
 
+# Plans/coupons are configuration, not demo data — they must exist on Atlas too,
+# or /subscribe renders an empty page. $setOnInsert makes this a no-op once seeded.
+echo "→ ensuring subscription plans"
+node src/seed/plans.js || echo "→ plan seed failed (continuing)"
+
 echo "→ starting API"
 exec node src/index.js
