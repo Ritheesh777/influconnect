@@ -32,10 +32,13 @@ const userSchema = new Schema(
 
     status: {
       type: String,
-      enum: ['active', 'suspended', 'banned'],
+      // 'deleted' (§34) reuses this field on purpose: login already refuses any
+      // status other than 'active', so deletion blocks sign-in with no new gate.
+      enum: ['active', 'suspended', 'banned', 'deleted'],
       default: 'active',
       index: true,
     },
+    deletedAt: { type: Date, default: null },
     isVerified: { type: Boolean, default: false }, // email verification
     isAdminVerified: { type: Boolean, default: false }, // admin trust badge (fake-follower check)
 

@@ -9,6 +9,7 @@ import * as collab from '../controllers/collaborationController.js';
 import * as complaint from '../controllers/complaintController.js';
 import * as publicC from '../controllers/publicController.js';
 import * as media from '../controllers/mediaController.js';
+import * as ranking from '../controllers/rankingController.js';
 
 // ── Saved campaigns (creator) ─────────────────────────
 export const savedRouter = Router();
@@ -52,3 +53,9 @@ publicRouter.post(
   publicC.submitContact
 );
 publicRouter.get('/stats', publicC.getPublicStats);
+
+// ── Ranking & trophies (§13–§16) ──────────────────────
+export const rankingRouter = Router();
+rankingRouter.get('/me', protect, ranking.myRanking);
+rankingRouter.get('/leaderboard', protect, ranking.leaderboard);
+rankingRouter.get('/user/:id', protect, ranking.userRanking);

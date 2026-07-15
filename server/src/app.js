@@ -14,6 +14,7 @@ import reviewRoutes from './routes/reviewRoutes.js';
 import notificationRoutes from './routes/notificationRoutes.js';
 import adminRoutes from './routes/adminRoutes.js';
 import subscriptionRoutes from './routes/subscriptionRoutes.js';
+import supportRoutes from './routes/supportRoutes.js';
 import { razorpayWebhook } from './controllers/subscriptionController.js';
 import {
   savedRouter,
@@ -21,6 +22,7 @@ import {
   complaintRouter,
   mediaRouter,
   publicRouter,
+  rankingRouter,
 } from './routes/miscRoutes.js';
 
 export function createApp() {
@@ -70,6 +72,8 @@ export function createApp() {
   app.use('/api/media', mediaRouter);
   app.use('/api/public', publicRouter);
   app.use('/api/subscriptions', subscriptionRoutes);
+  app.use('/api/support', supportRoutes);
+  app.use('/api/ranking', rankingRouter);
   app.use('/api/admin', adminRoutes);
 
   app.use(notFound);

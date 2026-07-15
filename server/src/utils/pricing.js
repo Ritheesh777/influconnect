@@ -14,11 +14,28 @@ import { ApiError } from './apiError.js';
  * Every number here is configurable rather than hardcoded (§10) — these are the
  * defaults until the admin settings UI lands.
  */
+/** Fallback values, used only before an admin has saved any settings. */
 export const PRICING_CONFIG = {
   firstSubscriptionPercent: 70, // §10 — recommended initial configuration
   maxCombinedPercent: 80, // §11 — combined discounts may never exceed this
   minChargeablePaise: 100, // ₹1 — Razorpay rejects tiny/zero amounts
 };
+
+/** Live pricing config from admin settings (§10/§11), falling back to defaults. */
+export async function pricingConfig() {
+  try {
+    const { PlatformSettings } = await import('../models/PlatformSettings.js');
+    const s = await PlatformSettings.get();
+    return {
+      firstSubscriptionPercent: s?.pricing?.firstSubscriptionPercent ?? PRICING_CONFIG.firstSubscriptionPercent,
+      maxCombinedPercent: s?.pricing?.maxCombinedPercent ?? PRICING_CONFIG.maxCombinedPercent,
+      minChargeablePaise: s?.pricing?.minChargeablePaise ?? PRICING_CONFIG.minChargeablePaise,
+    };
+  } catch {
+    // A settings read must never block a checkout — fall back to the defaults.
+    return { ...PRICING_CONFIG };
+  }
+}
 
 /** Has this user ever paid for a subscription before? (§10 first-sub discount) */
 export async function isFirstSubscription(userId) {
@@ -36,7 +53,7 @@ export async function rankDiscountFor(userId, role) {
     status: 'completed',
     completedAt: { $gte: start },
   });
-  const rank = rankFor(completedThisMonth);
+  const rank = await rankFor(completedThisMonth);
   return { rank, percent: rank.discountPercent, completedThisMonth };
 }
 
@@ -47,8 +64,9 @@ export async function rankDiscountFor(userId, role) {
 export async function quotePrice({ user, plan, couponCode }) {
   const role = plan.audience; // 'company' | 'creator'
   const base = plan.pricePaise;
+  const cfg = await pricingConfig();
 
-  const first = (await isFirstSubscription(user._id)) ? PRICING_CONFIG.firstSubscriptionPercent : 0;
+  const first = (await isFirstSubscription(user._id)) ? cfg.firstSubscriptionPercent : 0;
   const { rank, percent: rankPercent } = await rankDiscountFor(user._id, role);
 
   let coupon = null;
@@ -76,12 +94,12 @@ export async function quotePrice({ user, plan, couponCode }) {
 
   // Percentages stack, then get capped (§11)
   const rawPercent = first + rankPercent + couponPercent;
-  const effectivePercent = Math.min(rawPercent, PRICING_CONFIG.maxCombinedPercent);
-  const capped = rawPercent > PRICING_CONFIG.maxCombinedPercent;
+  const effectivePercent = Math.min(rawPercent, cfg.maxCombinedPercent);
+  const capped = rawPercent > cfg.maxCombinedPercent;
 
   let amount = Math.round(base * (1 - effectivePercent / 100));
   amount -= couponFixedPaise; // fixed coupons apply after the percentages
-  amount = Math.max(PRICING_CONFIG.minChargeablePaise, amount); // never free/negative
+  amount = Math.max(cfg.minChargeablePaise, amount); // never free/negative
 
   const discount = base - amount;
 
@@ -101,9 +119,9 @@ export async function quotePrice({ user, plan, couponCode }) {
       rankName: rank.name,
       couponPercent,
       couponFixedPaise,
-      cappedAtPercent: capped ? PRICING_CONFIG.maxCombinedPercent : 0,
+      cappedAtPercent: capped ? cfg.maxCombinedPercent : 0,
       effectivePercent,
-      maxCombinedPercent: PRICING_CONFIG.maxCombinedPercent,
+      maxCombinedPercent: cfg.maxCombinedPercent,
     },
     coupon: coupon ? { _id: coupon._id, code: coupon.code, description: coupon.description } : null,
     couponError,

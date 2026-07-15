@@ -7,6 +7,7 @@
  *
  * Thresholds and discounts are configurable (§13, §16); these are the defaults.
  */
+/** Fallback ladder, used only before an admin has saved any settings. */
 export const RANKS = [
   { key: 'rookie', name: 'Rookie', min: 0, max: 3, discountPercent: 0 },
   { key: 'bronze', name: 'Bronze', min: 4, max: 7, discountPercent: 5 },
@@ -15,11 +16,36 @@ export const RANKS = [
   { key: 'platinum', name: 'Platinum', min: 26, max: Infinity, discountPercent: 20 },
 ];
 
-export function rankFor(completedThisMonth = 0) {
+/**
+ * The live ladder, from admin settings (§13/§16). `max: null` in the DB means
+ * "no ceiling" — normalised to Infinity so the same comparison works for both.
+ */
+export async function rankLadder() {
+  try {
+    const { PlatformSettings } = await import('../models/PlatformSettings.js');
+    const s = await PlatformSettings.get();
+    if (!s?.ranks?.length) return RANKS;
+    return s.ranks
+      .map((r) => ({
+        key: r.key,
+        name: r.name,
+        min: r.min,
+        max: r.max === null || r.max === undefined ? Infinity : r.max,
+        discountPercent: r.discountPercent,
+      }))
+      .sort((a, b) => a.min - b.min);
+  } catch {
+    // Never let a settings read break ranking — fall back to the defaults.
+    return RANKS;
+  }
+}
+
+/** Synchronous rank lookup against a supplied ladder (defaults when omitted). */
+export function rankForWith(ladder, completedThisMonth = 0) {
   const n = Number(completedThisMonth) || 0;
-  const rank = RANKS.find((r) => n >= r.min && n <= r.max) || RANKS[0];
-  const idx = RANKS.indexOf(rank);
-  const next = RANKS[idx + 1] || null;
+  const rank = ladder.find((r) => n >= r.min && n <= r.max) || ladder[0];
+  const idx = ladder.indexOf(rank);
+  const next = ladder[idx + 1] || null;
   return {
     key: rank.key,
     name: rank.name,
@@ -34,6 +60,11 @@ export function rankFor(completedThisMonth = 0) {
         }
       : null,
   };
+}
+
+/** Rank lookup using the admin-configured ladder. */
+export async function rankFor(completedThisMonth = 0) {
+  return rankForWith(await rankLadder(), completedThisMonth);
 }
 
 /** 'YYYY-MM' key for the current ranking period. */
@@ -61,7 +92,7 @@ export async function snapshotRanking(userId, role) {
     status: 'completed',
     completedAt: { $gte: start, $lt: end },
   });
-  const rank = rankFor(completed);
+  const rank = await rankFor(completed);
 
   await MonthlyRanking.findOneAndUpdate(
     { user: userId, period: periodKey() },
@@ -91,13 +122,20 @@ export async function rankingProfile(userId, role) {
     MonthlyRanking.find({ user: userId }).sort('-period').limit(12).lean(),
   ]);
 
-  const current = rankFor(thisMonth);
+  const ladder = await rankLadder();
+  const current = rankForWith(ladder, thisMonth);
   const previous = history.find((h) => h.period !== periodKey()) || null;
-  // Highest rank ever achieved — history is preserved even after a monthly reset
-  const highest = history.reduce((best, h) => {
-    const i = RANKS.findIndex((r) => r.key === h.rankKey);
-    return i > best.i ? { i, name: h.rankName, period: h.period } : best;
-  }, { i: RANKS.findIndex((r) => r.key === current.key), name: current.name, period: periodKey() });
+  // Highest rank ever achieved — history survives the monthly reset (BR-NEW-011).
+  // Seniority is measured against the *live* ladder so a renamed or re-ordered
+  // rank is still compared on the correct scale. A historic rank the admin has
+  // since removed scores -1 and simply loses, rather than throwing.
+  const highest = history.reduce(
+    (best, h) => {
+      const i = ladder.findIndex((r) => r.key === h.rankKey);
+      return i > best.i ? { i, name: h.rankName, period: h.period } : best;
+    },
+    { i: ladder.findIndex((r) => r.key === current.key), name: current.name, period: periodKey() }
+  );
 
   return {
     current,

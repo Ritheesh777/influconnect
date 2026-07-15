@@ -12,7 +12,25 @@ import { ApiError } from './apiError.js';
  * Enforced on the backend immediately before a collaboration is created (§6, §36),
  * so applications/invitations can never sneak past the limit.
  */
+/** Fallback, used only before an admin has saved any settings. */
 export const FREE_COLLAB_LIMIT = 3;
+
+/** The configured free limit (§4/§5), falling back to the default. */
+export async function freeLimit() {
+  try {
+    const { PlatformSettings } = await import('../models/PlatformSettings.js');
+    const s = await PlatformSettings.get();
+    return s?.freeCollabLimit ?? FREE_COLLAB_LIMIT;
+  } catch {
+    return FREE_COLLAB_LIMIT;
+  }
+}
+
+/** The first-subscription discount, for display on quota cards (§10/§35). */
+async function firstSubDiscount() {
+  const { pricingConfig } = await import('./pricing.js');
+  return (await pricingConfig()).firstSubscriptionPercent;
+}
 
 /** An active, unexpired subscription lifts the free limit (§7). */
 export function hasActiveSubscription(user) {
@@ -49,22 +67,28 @@ export async function quotaFor(user, role) {
     };
   }
 
+  const limit = await freeLimit();
   return {
     plan: 'free',
     subscribed: false,
     unlimited: false,
-    limit: FREE_COLLAB_LIMIT,
+    limit,
     used,
-    remaining: Math.max(0, FREE_COLLAB_LIMIT - used),
-    requiresSubscription: used >= FREE_COLLAB_LIMIT,
-    firstSubscriptionDiscount: 70, // §10 — configurable by admin later
+    remaining: Math.max(0, limit - used),
+    requiresSubscription: used >= limit,
+    firstSubscriptionDiscount: await firstSubDiscount(),
   };
 }
 
-const MESSAGES = {
-  company: 'Your 3 free collaborations have been used. Subscribe to continue collaborating with creators.',
-  creator: 'You have completed your 3 free collaborations. Subscribe to continue collaborating with brands.',
-};
+/**
+ * The exact wording required by §4 and §5, with the limit interpolated so the
+ * message stays true if an admin changes it from 3.
+ */
+function limitMessage(role, limit) {
+  return role === 'company'
+    ? `Your ${limit} free collaborations have been used. Subscribe to continue collaborating with creators.`
+    : `You have completed your ${limit} free collaborations. Subscribe to continue collaborating with brands.`;
+}
 
 /**
  * Throws unless `user` may enter one more collaboration.
@@ -83,5 +107,6 @@ export async function assertCanCollaborate(user, role) {
   }
 
   const used = await countCollaborations(user._id, role);
-  if (used >= FREE_COLLAB_LIMIT) throw ApiError.forbidden(MESSAGES[role] || MESSAGES.creator);
+  const limit = await freeLimit();
+  if (used >= limit) throw ApiError.forbidden(limitMessage(role, limit));
 }
