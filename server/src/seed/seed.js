@@ -8,6 +8,20 @@ import { Campaign } from '../models/Campaign.js';
 
 async function seed() {
   await connectDB();
+
+  // SAFETY: seeding wipes the database. Never do that to a database that
+  // already holds real accounts (e.g. once MONGO_URI points at Atlas).
+  // Use `FORCE_SEED=1 npm run seed` to deliberately reset.
+  const existing = await User.countDocuments();
+  if (existing > 0 && process.env.FORCE_SEED !== '1') {
+    console.log(
+      `⏭️  Seed skipped — database already has ${existing} user(s). ` +
+        'Run with FORCE_SEED=1 to wipe and reseed.'
+    );
+    await mongoose.disconnect();
+    process.exit(0);
+  }
+
   console.log('🌱 Seeding InfluConnect...');
 
   await Promise.all([

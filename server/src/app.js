@@ -24,6 +24,12 @@ import {
 export function createApp() {
   const app = express();
 
+  // Hosts like Render/Railway put a load balancer in front of us. Without this,
+  // req.ip is the balancer's address for EVERY visitor — which makes the auth
+  // rate limiter treat all users as one client and lock everybody out (429).
+  // `1` = trust exactly one proxy hop (never `true`, which allows IP spoofing).
+  app.set('trust proxy', 1);
+
   app.use(
     cors({
       origin: [env.clientUrl, 'http://localhost:5173', 'capacitor://localhost', 'http://localhost'],
@@ -32,7 +38,8 @@ export function createApp() {
   );
   app.use(express.json({ limit: '2mb' }));
   app.use(express.urlencoded({ extended: true }));
-  if (env.nodeEnv === 'development') app.use(morgan('dev'));
+  // Log requests in every environment — without this, production errors are invisible.
+  app.use(morgan(env.nodeEnv === 'development' ? 'dev' : 'combined'));
 
   app.get('/api/health', (_req, res) =>
     res.json({ success: true, service: 'InfluConnect API', time: new Date().toISOString() })
