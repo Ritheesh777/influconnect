@@ -2,7 +2,7 @@
  * Creator loyalty tiers — driven by COMPLETED, on-platform collaborations.
  *
  * This is the anti-disintermediation lever: the discount only accrues when a
- * collaboration is actually finished inside InfluConnect, so creators have a
+ * collaboration is actually finished inside Collably, so creators have a
  * standing reason to keep deals on-platform rather than moving to DMs.
  *
  * Payments/subscriptions ship in v2 — until then `discountPercent` is computed

@@ -10,7 +10,7 @@ export default function AuthShell({ title, subtitle, children, side = 'creator' 
   const panels = {
     creator: {
       image: IMG('photo-1524504388940-b1c1722653e1'),
-      quote: 'InfluConnect got me four brand deals in my first month.',
+      quote: 'Collably got me four brand deals in my first month.',
       who: 'Ananya — Lifestyle Creator',
       points: ['Browse local & niche campaigns', 'Showcase your media kit', 'Build a public reputation'],
     },

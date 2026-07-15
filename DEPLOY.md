@@ -1,7 +1,7 @@
-# Deploying InfluConnect
+# Deploying Collably
 
 Two pieces ship separately:
-- **Frontend** (React SPA) → **Vercel** → `influconnect.vercel.app`
+- **Frontend** (React SPA) → **Vercel** → `collably.vercel.app`
 - **Backend** (Express + Socket.io) → a container host → provides the API URL
 - **Database** → **MongoDB Atlas** (free tier)
 
@@ -22,8 +22,8 @@ Two pieces ship separately:
 2. **Database Access** → add a user (username + password).
 3. **Network Access** → Allow access from anywhere (`0.0.0.0/0`) for now.
 4. **Connect → Drivers** → copy the connection string, e.g.
-   `mongodb+srv://USER:PASSWORD@cluster0.xxxx.mongodb.net/influconnect`
-   (add `/influconnect` before the `?` so it uses that DB).
+   `mongodb+srv://USER:PASSWORD@cluster0.xxxx.mongodb.net/collably`
+   (add `/collably` before the `?` so it uses that DB).
 
 ---
 
@@ -38,10 +38,10 @@ Render runs the included `server/Dockerfile` and supports WebSockets.
    | `MONGO_URI` | your Atlas string from step 1 |
    | `JWT_SECRET` | a long random string |
    | `JWT_EXPIRES_IN` | `7d` |
-   | `CLIENT_URL` | `https://influconnect.vercel.app` |
+   | `CLIENT_URL` | `https://collably.vercel.app` |
    | `NODE_ENV` | `production` |
    | `CLOUDINARY_CLOUD_NAME` / `CLOUDINARY_API_KEY` / `CLOUDINARY_API_SECRET` | from Cloudinary (optional at first) |
-4. Deploy. Note the URL, e.g. `https://influconnect-api.onrender.com`.
+4. Deploy. Note the URL, e.g. `https://collably-api.onrender.com`.
 5. Seed once (Render **Shell**): `npm run seed`.
 
 **Railway** works the same way (New Project → Deploy from repo → root `server` → add the same env vars).
@@ -56,14 +56,14 @@ commit it).
 
 ---
 
-## 3. Frontend — Vercel → influconnect.vercel.app
+## 3. Frontend — Vercel → collably.vercel.app
 1. vercel.com → **Add New → Project** → import the repo.
 2. **Root Directory:** `client` (Vercel reads `client/vercel.json`).
 3. **Environment Variable:**
    | Key | Value |
    |---|---|
-   | `VITE_API_URL` | your backend URL from step 2 (e.g. `https://influconnect-api.onrender.com`) |
-4. **Project name / domain:** set it so the URL is `influconnect.vercel.app`
+   | `VITE_API_URL` | your backend URL from step 2 (e.g. `https://collably-api.onrender.com`) |
+4. **Project name / domain:** set it so the URL is `collably.vercel.app`
    (Project Settings → Domains).
 5. Deploy.
 
@@ -73,8 +73,8 @@ both REST and Socket.io at it in production; in local dev it uses the Vite proxy
 ---
 
 ## 4. Final wiring
-1. Confirm the backend `CLIENT_URL` equals `https://influconnect.vercel.app` (CORS + Socket.io origin) and redeploy the backend if you changed it.
-2. Visit `https://influconnect.vercel.app` → register/login → chat should connect live.
+1. Confirm the backend `CLIENT_URL` equals `https://collably.vercel.app` (CORS + Socket.io origin) and redeploy the backend if you changed it.
+2. Visit `https://collably.vercel.app` → register/login → chat should connect live.
 
 ---
 

@@ -5,7 +5,7 @@ set -e
 # MONGO_URI is supplied (or it points at localhost). Provide a MongoDB Atlas
 # URI via the MONGO_URI env var to use a real, persistent database instead.
 if [[ -z "$MONGO_URI" || "$MONGO_URI" == *"127.0.0.1"* || "$MONGO_URI" == *"localhost"* ]]; then
-  export MONGO_URI="mongodb://127.0.0.1:27017/influconnect"
+  export MONGO_URI="mongodb://127.0.0.1:27017/collably"
   echo "→ starting embedded MongoDB"
   mkdir -p /data/db
   mongod --dbpath /data/db --bind_ip 127.0.0.1 --wiredTigerCacheSizeGB 0.25 --logpath /tmp/mongod.log &

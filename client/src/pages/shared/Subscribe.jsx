@@ -88,7 +88,7 @@ export default function Subscribe() {
         order_id: order.id,
         amount: order.amount,
         currency: order.currency,
-        name: 'InfluConnect',
+        name: 'Collably',
         description: q.plan.name,
         // Razorpay demands a contact number before it will show any payment
         // method. We already collect one at registration, so passing it here
@@ -281,7 +281,7 @@ export default function Subscribe() {
           {paying ? 'Opening payment…' : quote ? `Pay ${rupees(quote.amount)} securely` : 'Select a plan'}
         </button>
         <p className="mt-2 text-center text-xs text-ink-400">
-          Secured by Razorpay. This pays for your InfluConnect plan only — payments to creators stay
+          Secured by Razorpay. This pays for your Collably plan only — payments to creators stay
           between you and them.
         </p>
       </div>

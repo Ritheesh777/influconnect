@@ -55,7 +55,7 @@ export function createApp() {
   app.use(morgan(env.nodeEnv === 'development' ? 'dev' : 'combined'));
 
   app.get('/api/health', (_req, res) =>
-    res.json({ success: true, service: 'InfluConnect API', time: new Date().toISOString() })
+    res.json({ success: true, service: 'Collably API', time: new Date().toISOString() })
   );
 
   app.use('/api/auth', authRoutes);

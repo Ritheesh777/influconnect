@@ -8,7 +8,7 @@ export default function Legal({ kind = 'terms' }) {
         <h1 className="text-3xl font-bold text-ink-950 sm:text-4xl">{doc.title}</h1>
         <p className="mt-2 text-sm text-ink-400">Last updated: {new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
         <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
-          This is a plain-language template tailored to InfluConnect. Have a qualified lawyer
+          This is a plain-language template tailored to Collably. Have a qualified lawyer
           review and adapt it to your jurisdiction before you go live.
         </div>
       </Reveal>
@@ -27,7 +27,7 @@ export default function Legal({ kind = 'terms' }) {
           </Reveal>
         ))}
         <p className="text-sm text-ink-400">
-          Questions about this document? Contact us at <span className="font-medium text-ink-600">support@influconnect.com</span>.
+          Questions about this document? Contact us at <span className="font-medium text-ink-600">support@collably.com</span>.
         </p>
       </div>
     </div>
@@ -40,22 +40,22 @@ const TERMS = {
     {
       h: 'Acceptance of Terms',
       p: [
-        'Welcome to InfluConnect ("the Platform", "we", "us"). By creating an account or using the Platform, you agree to these Terms & Conditions and our Privacy Policy. If you do not agree, please do not use the Platform.',
-        'You must be at least 18 years old, or the age of majority in your jurisdiction, to use InfluConnect.',
+        'Welcome to Collably ("the Platform", "we", "us"). By creating an account or using the Platform, you agree to these Terms & Conditions and our Privacy Policy. If you do not agree, please do not use the Platform.',
+        'You must be at least 18 years old, or the age of majority in your jurisdiction, to use Collably.',
       ],
     },
     {
-      h: 'What InfluConnect Is',
+      h: 'What Collably Is',
       p: [
-        'InfluConnect is a marketplace that helps businesses ("Companies") and content creators ("Creators") discover one another, communicate, and arrange collaborations. We provide discovery, messaging, reviews, and moderation tools.',
+        'Collably is a marketplace that helps businesses ("Companies") and content creators ("Creators") discover one another, communicate, and arrange collaborations. We provide discovery, messaging, reviews, and moderation tools.',
         'We are a neutral venue. We are not a party to any agreement, deliverable, or transaction between a Company and a Creator, and we do not employ Creators or act as an agent for either side.',
       ],
     },
     {
       h: 'Payments Are Handled Off-Platform',
       p: [
-        'InfluConnect does not process payments in this version. Any fees, payment terms, deliverables, timelines, and refunds are agreed and settled privately between the Company and the Creator, outside the Platform.',
-        'You are solely responsible for your own payment arrangements, invoicing, and any taxes arising from your collaborations. InfluConnect is not liable for non-payment, non-delivery, or any dispute arising from an off-platform arrangement.',
+        'Collably does not process payments in this version. Any fees, payment terms, deliverables, timelines, and refunds are agreed and settled privately between the Company and the Creator, outside the Platform.',
+        'You are solely responsible for your own payment arrangements, invoicing, and any taxes arising from your collaborations. Collably is not liable for non-payment, non-delivery, or any dispute arising from an off-platform arrangement.',
       ],
     },
     {
@@ -75,7 +75,7 @@ const TERMS = {
     {
       h: 'Content & Intellectual Property',
       p: [
-        'You retain ownership of the content you upload (profiles, portfolios, media kits, messages). By posting it, you grant InfluConnect a limited, non-exclusive licence to host and display that content for the purpose of operating the Platform.',
+        'You retain ownership of the content you upload (profiles, portfolios, media kits, messages). By posting it, you grant Collably a limited, non-exclusive licence to host and display that content for the purpose of operating the Platform.',
         'You must have the rights to everything you upload. Do not post content you do not own or have permission to use.',
       ],
     },
@@ -83,7 +83,7 @@ const TERMS = {
       h: 'Reviews & Reputation',
       p: [
         'Reviews must reflect genuine, first-hand collaboration experiences. Fake, incentivised, retaliatory, or defamatory reviews are prohibited and may be removed.',
-        'Reviews represent the opinion of the author, not of InfluConnect.',
+        'Reviews represent the opinion of the author, not of Collably.',
       ],
     },
     {
@@ -96,7 +96,7 @@ const TERMS = {
       h: 'Disclaimers & Limitation of Liability',
       p: [
         'The Platform is provided "as is" without warranties of any kind. We do not guarantee that collaborations will be successful, that users are who they claim to be, or that the service will be uninterrupted or error-free.',
-        'To the maximum extent permitted by law, InfluConnect is not liable for any indirect, incidental, or consequential damages, or for any losses arising from off-platform arrangements between users.',
+        'To the maximum extent permitted by law, Collably is not liable for any indirect, incidental, or consequential damages, or for any losses arising from off-platform arrangements between users.',
       ],
     },
     {
@@ -114,7 +114,7 @@ const TERMS = {
     {
       h: 'Governing Law',
       p: [
-        'These Terms are governed by the laws of the jurisdiction in which InfluConnect operates. Insert your governing law and dispute-resolution venue here before launch.',
+        'These Terms are governed by the laws of the jurisdiction in which Collably operates. Insert your governing law and dispute-resolution venue here before launch.',
       ],
     },
   ],
@@ -126,7 +126,7 @@ const PRIVACY = {
     {
       h: 'Overview',
       p: [
-        'This Privacy Policy explains what information InfluConnect collects, how we use it, and the choices you have. We collect only what we need to run the marketplace and connect you with relevant partners.',
+        'This Privacy Policy explains what information Collably collects, how we use it, and the choices you have. We collect only what we need to run the marketplace and connect you with relevant partners.',
       ],
     },
     {
@@ -178,13 +178,13 @@ const PRIVACY = {
     {
       h: 'Children',
       p: [
-        'InfluConnect is not intended for anyone under 18, and we do not knowingly collect data from children.',
+        'Collably is not intended for anyone under 18, and we do not knowingly collect data from children.',
       ],
     },
     {
       h: 'Contact',
       p: [
-        'For any privacy question or request, contact us at privacy@influconnect.com.',
+        'For any privacy question or request, contact us at privacy@collably.com.',
       ],
     },
   ],

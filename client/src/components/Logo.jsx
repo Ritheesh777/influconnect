@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 /**
- * Custom InfluConnect mark: two interlocking nodes (brand + creator) joined by a
+ * Custom Collably mark: two interlocking nodes (brand + creator) joined by a
  * link — drawn as SVG, no emoji, crisp at any size.
  */
 export function LogoMark({ size = 34, className = '' }) {

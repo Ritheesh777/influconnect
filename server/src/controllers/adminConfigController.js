@@ -228,7 +228,7 @@ export const paymentHealth = asyncHandler(async (_req, res) => {
       amount: 100,
       currency: 'INR',
       receipt: `healthcheck_${Date.now()}`.slice(0, 40),
-      notes: { purpose: 'InfluConnect key health check — not a real purchase' },
+      notes: { purpose: 'Collably key health check — not a real purchase' },
     });
     res.json({
       success: true,

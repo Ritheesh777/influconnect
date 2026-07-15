@@ -26,9 +26,9 @@ export default function About() {
     <div className="mx-auto max-w-5xl px-4 py-14">
       <div className="grid gap-10 md:grid-cols-2">
         <div>
-          <h1 className="text-4xl font-bold text-slate-900">About InfluConnect</h1>
+          <h1 className="text-4xl font-bold text-slate-900">About Collably</h1>
           <p className="mt-4 text-slate-600">
-            InfluConnect is a marketplace built for small-to-mid-sized businesses and micro/mid-tier
+            Collably is a marketplace built for small-to-mid-sized businesses and micro/mid-tier
             content creators — a segment underserved by enterprise influencer platforms.
           </p>
           <p className="mt-4 text-slate-600">

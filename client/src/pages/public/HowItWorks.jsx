@@ -22,7 +22,7 @@ export default function HowItWorks() {
   return (
     <div className="mx-auto max-w-5xl px-4 py-14">
       <Reveal className="text-center">
-        <h1 className="text-4xl font-bold text-ink-950">How InfluConnect Works</h1>
+        <h1 className="text-4xl font-bold text-ink-950">How Collably Works</h1>
         <p className="mt-3 text-ink-500">
           Two sides, one transparent workflow. No payments handled on-platform — you settle privately.
         </p>

@@ -22,7 +22,7 @@ const MAX_INLINE_BYTES = 3 * 1024 * 1024; // 3 MB
  * (This previously returned a truncated string, which produced broken images
  * everywhere — that was the "photos not loading" bug.)
  */
-export async function uploadBuffer(buffer, folder = 'influconnect', resourceType = 'auto', mimetype) {
+export async function uploadBuffer(buffer, folder = 'collably', resourceType = 'auto', mimetype) {
   if (!isCloudinaryConfigured()) {
     if (buffer.length > MAX_INLINE_BYTES) {
       throw ApiError.badRequest(

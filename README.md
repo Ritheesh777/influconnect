@@ -1,4 +1,4 @@
-# InfluConnect
+# Collably
 
 A brand–creator collaboration marketplace. Companies post campaigns, creators apply,
 both chat in real time, collaborate, and review each other. **No on-platform payments** —
@@ -19,7 +19,7 @@ settlement stays private (Version 1 scope). Built to later wrap into an Android 
 ## Project layout
 
 ```
-influconnect/
+collably/
 ├── server/          Express API + Socket.io
 │   └── src/
 │       ├── models/        Mongoose schemas
@@ -63,7 +63,7 @@ npm run dev
 
 | Role    | Email                          | Password       |
 |---------|--------------------------------|----------------|
-| Admin   | admin@influconnect.com         | Admin@12345    |
+| Admin   | admin@collably.com         | Admin@12345    |
 | Company | spiceroutekitchen@demo.com     | Password@123   |
 | Creator | ananyacreates@demo.com         | Password@123   |
 

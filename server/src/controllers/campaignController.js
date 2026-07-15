@@ -203,12 +203,12 @@ export const uploadCampaignMedia = asyncHandler(async (req, res) => {
   if (String(campaign.company) !== String(req.user._id)) throw ApiError.forbidden();
 
   if (req.files?.banner?.[0]) {
-    const r = await uploadBuffer(req.files.banner[0].buffer, 'influconnect/campaigns', 'image', req.files.banner[0].mimetype);
+    const r = await uploadBuffer(req.files.banner[0].buffer, 'collably/campaigns', 'image', req.files.banner[0].mimetype);
     campaign.bannerUrl = r.url;
   }
   if (req.files?.images?.length) {
     for (const f of req.files.images) {
-      const r = await uploadBuffer(f.buffer, 'influconnect/campaigns', 'image', f.mimetype);
+      const r = await uploadBuffer(f.buffer, 'collably/campaigns', 'image', f.mimetype);
       campaign.images.push(r.url);
     }
   }

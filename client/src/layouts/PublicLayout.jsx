@@ -115,7 +115,7 @@ export default function PublicLayout() {
         <div className="border-t border-ink-100 py-4 text-center text-xs text-ink-400">
           <div className="mx-auto flex max-w-6xl items-center justify-center gap-2 px-4">
             <LogoMark size={16} />
-            © {new Date().getFullYear()} InfluConnect. All rights reserved.
+            © {new Date().getFullYear()} Collably. All rights reserved.
           </div>
         </div>
       </footer>

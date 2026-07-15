@@ -45,7 +45,7 @@ export default function Landing() {
             </FadeIn>
             <FadeIn delay={0.12}>
               <p className="mx-auto mt-5 max-w-xl text-lg text-ink-600 lg:mx-0">
-                InfluConnect is the marketplace where small businesses and content creators
+                Collably is the marketplace where small businesses and content creators
                 discover each other, chat, and collaborate — transparently.
               </p>
             </FadeIn>
@@ -218,7 +218,7 @@ export default function Landing() {
           <div className="relative">
             <h2 className="text-3xl font-bold text-white sm:text-4xl">Ready to start collaborating?</h2>
             <p className="mx-auto mt-3 max-w-lg text-ink-300">
-              Join InfluConnect free today. Payments stay private between you and your partner.
+              Join Collably free today. Payments stay private between you and your partner.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
               <Link to="/register" className="btn-primary px-5 py-3 text-base">Get Started Free</Link>

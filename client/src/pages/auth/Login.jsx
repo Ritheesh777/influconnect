@@ -33,7 +33,7 @@ export default function Login() {
   };
 
   return (
-    <AuthShell title="Welcome back" subtitle="Log in to your InfluConnect account." side={role}>
+    <AuthShell title="Welcome back" subtitle="Log in to your Collably account." side={role}>
       <div className="mb-5 grid grid-cols-2 gap-1 rounded-xl bg-ink-100 p-1">
         {['creator', 'company'].map((r) => (
           <button

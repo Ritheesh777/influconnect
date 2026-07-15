@@ -29,7 +29,7 @@ async function seed() {
     process.exit(0);
   }
 
-  console.log('🌱 Seeding InfluConnect...');
+  console.log('🌱 Seeding Collably...');
 
   await Promise.all([
     User.deleteMany({}),
@@ -90,7 +90,7 @@ async function seed() {
       country: c.country,
       logoUrl: c.logo,
       bannerUrl: c.banner,
-      description: `${c.name} is a demo ${c.industry.toLowerCase()} brand on InfluConnect.`,
+      description: `${c.name} is a demo ${c.industry.toLowerCase()} brand on Collably.`,
     });
     companies.push({ user, profile });
   }

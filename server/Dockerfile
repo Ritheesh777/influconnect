@@ -1,4 +1,4 @@
-# InfluConnect API — self-contained image: Node + an embedded MongoDB, so it runs
+# Collably API — self-contained image: Node + an embedded MongoDB, so it runs
 # on any Docker host (Render/Railway/HF) without a separate database service.
 # If a real MONGO_URI (e.g. MongoDB Atlas) is provided, the embedded DB is
 # skipped and that one is used instead — so this same image goes to production.

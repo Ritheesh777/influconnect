@@ -1,8 +1,8 @@
 {
-  "name": "influconnect",
+  "name": "collably",
   "version": "1.0.0",
   "private": true,
-  "description": "InfluConnect — Brand–Creator collaboration marketplace (MERN + Socket.io, Capacitor-ready)",
+  "description": "Collably — Brand–Creator collaboration marketplace (MERN + Socket.io, Capacitor-ready)",
   "scripts": {
     "dev": "concurrently -n api,web -c blue,magenta \"npm:dev:server\" \"npm:dev:client\"",
     "dev:server": "npm --prefix server run dev",

@@ -1,6 +1,6 @@
 # Payments — how to test, and how to go live
 
-InfluConnect takes **subscription payments only**, through Razorpay (v2 §9).
+Collably takes **subscription payments only**, through Razorpay (v2 §9).
 Company↔creator collaboration payments are deliberately **not** handled here —
 those two settle directly via UPI/GPay/bank transfer.
 

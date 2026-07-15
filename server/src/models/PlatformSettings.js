@@ -50,7 +50,7 @@ const platformSettingsSchema = new Schema(
 
     // §33 — "The Administrator should be able to update official support information"
     support: {
-      email: { type: String, default: 'support@influconnect.in' },
+      email: { type: String, default: 'support@collably.in' },
       helpline: { type: String, default: '' },
       hours: { type: String, default: 'Mon–Fri, 10:00–18:00 IST' },
       responseTime: { type: String, default: 'Within 24 hours on working days' },

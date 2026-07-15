@@ -54,13 +54,13 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 export const updateMedia = asyncHandler(async (req, res) => {
   const update = {};
   if (req.files?.logo?.[0]) {
-    const r = await uploadBuffer(req.files.logo[0].buffer, 'influconnect/company/logos', 'image', req.files.logo[0].mimetype);
+    const r = await uploadBuffer(req.files.logo[0].buffer, 'collably/company/logos', 'image', req.files.logo[0].mimetype);
     update.logoUrl = r.url;
   }
   if (req.files?.banner?.[0]) {
     const r = await uploadBuffer(
       req.files.banner[0].buffer,
-      'influconnect/company/banners',
+      'collably/company/banners',
       'image',
       req.files.banner[0].mimetype
     );

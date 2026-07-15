@@ -1,7 +1,7 @@
 {
-  "name": "influconnect-server",
+  "name": "collably-server",
   "version": "1.0.0",
-  "description": "InfluConnect API — Brand–Creator collaboration marketplace",
+  "description": "Collably API — Brand–Creator collaboration marketplace",
   "type": "module",
   "main": "src/index.js",
   "scripts": {

@@ -43,7 +43,7 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 // PATCH /api/creator/me/avatar  (multipart: avatar)
 export const updateAvatar = asyncHandler(async (req, res) => {
   if (!req.file) throw ApiError.badRequest('No image provided');
-  const r = await uploadBuffer(req.file.buffer, 'influconnect/creator/avatars', 'image', req.file.mimetype);
+  const r = await uploadBuffer(req.file.buffer, 'collably/creator/avatars', 'image', req.file.mimetype);
   const profile = await CreatorProfile.findOneAndUpdate(
     { user: req.user._id },
     { avatarUrl: r.url },
@@ -71,7 +71,7 @@ export const addPortfolioItems = asyncHandler(async (req, res) => {
     for (const f of req.files) {
       const isPdf = f.mimetype.includes('pdf');
       const isVideo = f.mimetype.includes('video');
-      const r = await uploadBuffer(f.buffer, 'influconnect/creator/portfolio', 'auto', f.mimetype);
+      const r = await uploadBuffer(f.buffer, 'collably/creator/portfolio', 'auto', f.mimetype);
       items.push({
         type: isPdf ? 'pdf' : isVideo ? 'video' : 'image',
         title: f.originalname,
@@ -102,7 +102,7 @@ export const removePortfolioItem = asyncHandler(async (req, res) => {
 // PATCH /api/creator/me/media-kit (multipart: file)
 export const updateMediaKit = asyncHandler(async (req, res) => {
   if (!req.file) throw ApiError.badRequest('No file provided');
-  const r = await uploadBuffer(req.file.buffer, 'influconnect/creator/mediakit', 'auto', req.file.mimetype);
+  const r = await uploadBuffer(req.file.buffer, 'collably/creator/mediakit', 'auto', req.file.mimetype);
   const profile = await CreatorProfile.findOneAndUpdate(
     { user: req.user._id },
     { mediaKitUrl: r.url },

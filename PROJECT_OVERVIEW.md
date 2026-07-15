@@ -1,10 +1,10 @@
-# InfluConnect — What This Project Does
+# Collably — What This Project Does
 
 ## In one line
-InfluConnect is a **brand–creator collaboration marketplace**: businesses post campaigns, content creators discover and apply to them, both sides chat in real time, collaborate, and review each other — all in one trusted, moderated place. **No money changes hands on the platform** (payments are settled privately); the product's job is discovery, communication, and trust.
+Collably is a **brand–creator collaboration marketplace**: businesses post campaigns, content creators discover and apply to them, both sides chat in real time, collaborate, and review each other — all in one trusted, moderated place. **No money changes hands on the platform** (payments are settled privately); the product's job is discovery, communication, and trust.
 
 ## The problem it solves
-Small and mid-sized businesses (restaurants, fashion labels, cafés, gyms, gaming studios, travel brands…) increasingly rely on micro and mid-tier creators for marketing. Today that happens through messy Instagram DMs, WhatsApp, and cold outreach — with **no structured search, no way to verify each other, no single record of the deal, and no accountability**. InfluConnect replaces that chaos with a structured marketplace.
+Small and mid-sized businesses (restaurants, fashion labels, cafés, gyms, gaming studios, travel brands…) increasingly rely on micro and mid-tier creators for marketing. Today that happens through messy Instagram DMs, WhatsApp, and cold outreach — with **no structured search, no way to verify each other, no single record of the deal, and no accountability**. Collably replaces that chaos with a structured marketplace.
 
 ## Who uses it (three roles)
 1. **Company** — a business that posts campaigns and hires creators.

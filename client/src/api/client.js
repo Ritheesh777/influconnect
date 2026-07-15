@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // In dev, Vite proxies /api -> :5050. For a Capacitor build, set VITE_API_URL
-// to your deployed API origin (e.g. https://api.influconnect.com).
+// to your deployed API origin (e.g. https://api.collably.com).
 const baseURL = import.meta.env.VITE_API_URL
   ? `${import.meta.env.VITE_API_URL}/api`
   : '/api';

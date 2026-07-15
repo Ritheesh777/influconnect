@@ -1,6 +1,6 @@
 {
-  "appId": "com.influconnect.app",
-  "appName": "InfluConnect",
+  "appId": "com.collably.app",
+  "appName": "Collably",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",

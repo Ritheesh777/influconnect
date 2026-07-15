@@ -20,7 +20,7 @@ async function start() {
   initChat(io);
 
   server.listen(env.port, () => {
-    console.log(`🚀 InfluConnect API running on http://localhost:${env.port} [${env.nodeEnv}]`);
+    console.log(`🚀 Collably API running on http://localhost:${env.port} [${env.nodeEnv}]`);
   });
 }
 

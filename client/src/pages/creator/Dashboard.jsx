@@ -113,7 +113,7 @@ function TierCard({ tier }) {
               )}
             </div>
             <p className="text-sm text-ink-500">
-              {tier.completed} completed collaboration{tier.completed === 1 ? '' : 's'} on InfluConnect
+              {tier.completed} completed collaboration{tier.completed === 1 ? '' : 's'} on Collably
             </p>
           </div>
         </div>
@@ -134,7 +134,7 @@ function TierCard({ tier }) {
         )}
       </div>
       <div className="border-t border-ink-200 bg-ink-50 px-5 py-2.5 text-xs text-ink-500">
-        Only collaborations completed on InfluConnect count toward your tier.
+        Only collaborations completed on Collably count toward your tier.
       </div>
     </div>
   );

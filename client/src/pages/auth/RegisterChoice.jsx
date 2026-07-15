@@ -9,7 +9,7 @@ export default function RegisterChoice() {
       <div className="pointer-events-none absolute inset-0 -z-10 bg-mesh opacity-40" />
       <Logo />
       <FadeIn className="mt-8 text-center">
-        <h1 className="text-3xl font-bold text-ink-950">Join InfluConnect</h1>
+        <h1 className="text-3xl font-bold text-ink-950">Join Collably</h1>
         <p className="mt-2 text-ink-500">Choose how you want to get started.</p>
       </FadeIn>
 

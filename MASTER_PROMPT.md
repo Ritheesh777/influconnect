@@ -1,10 +1,10 @@
-# InfluConnect — Master Build Prompt
+# Collably — Master Build Prompt
 
 > Paste everything below into a capable coding agent to regenerate the entire application from scratch. It is self-contained: product, roles, pages, data model, API, real-time, design system, and constraints.
 
 ---
 
-You are building **InfluConnect**, a production-grade **brand–creator collaboration marketplace** (a web app that will later be wrapped as an Android APK with Capacitor). Build it end to end.
+You are building **Collably**, a production-grade **brand–creator collaboration marketplace** (a web app that will later be wrapped as an Android APK with Capacitor). Build it end to end.
 
 ## 1. Product summary
 A marketplace connecting **Companies** (businesses) and **Creators** (influencers), plus an **Administrator**. Companies post campaigns; creators apply or get invited; both chat in real time; they collaborate and review each other. **No payments are processed on-platform** — payment is arranged privately/offline. The platform's value is structured discovery, real-time communication, mutual reviews, and moderation.
