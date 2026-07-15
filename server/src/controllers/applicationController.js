@@ -169,17 +169,26 @@ export const decideApplication = asyncHandler(async (req, res) => {
   if (application.status !== 'pending')
     throw ApiError.badRequest(`Application already ${application.status}`);
 
+  // §6/§36 — check quota for BOTH sides BEFORE touching the application. A
+  // collaboration consumes one free slot from each party.
+  //
+  // The order matters: this used to run after the application was saved, so a
+  // company that hit the quota wall left the application stuck at 'accepted'
+  // with no collaboration behind it. Subscribing did not help — retrying was
+  // refused with "Application already accepted", permanently stranding the
+  // creator. Nothing may be mutated until both parties are cleared.
+  let creatorUser = null;
+  if (decision === 'accepted') {
+    await assertCanCollaborate(req.user, 'company');
+    creatorUser = await User.findById(application.creator);
+    await assertCanCollaborate(creatorUser, 'creator');
+  }
+
   application.status = decision;
   application.respondedAt = new Date();
   await application.save();
 
   if (decision === 'accepted') {
-    // §6/§36 — check quota for BOTH sides immediately before creating the
-    // collaboration. A collaboration consumes one free slot from each party.
-    await assertCanCollaborate(req.user, 'company');
-    const creatorUser = await User.findById(application.creator);
-    await assertCanCollaborate(creatorUser, 'creator');
-
     // Mutual agreement reached → create the collaboration AND unlock chat (§3, §6)
     const collab = await Collaboration.create({
       campaign: application.campaign._id,
