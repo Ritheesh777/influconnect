@@ -90,7 +90,10 @@ export default function Subscribe() {
         currency: order.currency,
         name: 'InfluConnect',
         description: q.plan.name,
-        prefill: { name: user?.name, email: user?.email },
+        // Razorpay demands a contact number before it will show any payment
+        // method. We already collect one at registration, so passing it here
+        // removes a whole "Contact details" step from every checkout.
+        prefill: { name: user?.name, email: user?.email, contact: user?.phone || '' },
         theme: { color: '#d9542f' },
         handler: async (resp) => {
           // The browser saying "paid" proves nothing — the server verifies the

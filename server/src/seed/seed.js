@@ -64,9 +64,9 @@ async function seed() {
 
   // Companies
   const companySeeds = [
-    { name: 'Spice Route Kitchen', industry: 'Restaurant', city: 'Bengaluru', country: 'India', logo: img('photo-1552566626-52f8b828add9', 300), banner: categoryImg.Restaurant },
-    { name: 'Aura Fashion Co.', industry: 'Fashion', city: 'Mumbai', country: 'India', logo: img('photo-1490481651871-ab68de25d43d', 300), banner: categoryImg.Fashion },
-    { name: 'PixelForge Games', industry: 'Gaming', city: 'Hyderabad', country: 'India', logo: img('photo-1511512578047-dfb367046420', 300), banner: categoryImg.Gaming },
+    { name: 'Spice Route Kitchen', industry: 'Restaurant', city: 'Bengaluru', country: 'India', phone: '9845100001', logo: img('photo-1552566626-52f8b828add9', 300), banner: categoryImg.Restaurant },
+    { name: 'Aura Fashion Co.', industry: 'Fashion', city: 'Mumbai', country: 'India', phone: '9820100002', logo: img('photo-1490481651871-ab68de25d43d', 300), banner: categoryImg.Fashion },
+    { name: 'PixelForge Games', industry: 'Gaming', city: 'Hyderabad', country: 'India', phone: '9848100003', logo: img('photo-1511512578047-dfb367046420', 300), banner: categoryImg.Gaming },
   ];
   const companies = [];
   for (const c of companySeeds) {
@@ -74,6 +74,9 @@ async function seed() {
       role: 'company',
       name: c.name,
       email: `${c.name.toLowerCase().replace(/[^a-z]/g, '')}@demo.com`,
+      // Razorpay's checkout asks for a contact number if we don't prefill one,
+      // so demo accounts carry a phone to show the real experience.
+      phone: c.phone,
       password: 'Password@123',
       isVerified: true,
       isAdminVerified: true,
@@ -94,9 +97,9 @@ async function seed() {
 
   // Creators
   const creatorSeeds = [
-    { name: 'Ananya Rao', username: 'ananya.creates', followers: 24000, city: 'Bengaluru', avatar: img('photo-1494790108377-be9c29b29330'), cats: ['Fashion', 'Beauty'] },
-    { name: 'Rahul Menon', username: 'rahul.eats', followers: 68000, city: 'Kochi', avatar: img('photo-1500648767791-00dcc994a43e'), cats: ['Restaurant', 'Travel'] },
-    { name: 'Zara Sheikh', username: 'zarastyle', followers: 152000, city: 'Mumbai', avatar: img('photo-1438761681033-6461ffad8d80'), cats: ['Fashion', 'Beauty'] },
+    { name: 'Ananya Rao', username: 'ananya.creates', followers: 24000, city: 'Bengaluru', phone: '9845012345', avatar: img('photo-1494790108377-be9c29b29330'), cats: ['Fashion', 'Beauty'] },
+    { name: 'Rahul Menon', username: 'rahul.eats', followers: 68000, city: 'Kochi', phone: '9895023456', avatar: img('photo-1500648767791-00dcc994a43e'), cats: ['Restaurant', 'Travel'] },
+    { name: 'Zara Sheikh', username: 'zarastyle', followers: 152000, city: 'Mumbai', phone: '9820034567', avatar: img('photo-1438761681033-6461ffad8d80'), cats: ['Fashion', 'Beauty'] },
   ];
   const creators = [];
   for (const c of creatorSeeds) {
@@ -104,6 +107,7 @@ async function seed() {
       role: 'creator',
       name: c.name,
       email: `${c.username.replace(/[^a-z]/g, '')}@demo.com`,
+      phone: c.phone,
       password: 'Password@123',
       isVerified: true,
       isAdminVerified: true,
