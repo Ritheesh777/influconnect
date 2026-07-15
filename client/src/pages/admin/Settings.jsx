@@ -56,6 +56,9 @@ export default function AdminSettings() {
   );
 }
 
+/** '' (a cleared field) means zero, never NaN. */
+const num = (v) => (v === '' || v === null || v === undefined || Number.isNaN(Number(v)) ? 0 : Number(v));
+
 function Section({ icon: Icon, title, subtitle, children }) {
   return (
     <div className="card p-5">
@@ -115,7 +118,21 @@ function Pricing({ s, save, saving }) {
       <button
         className="btn-primary mt-4"
         disabled={saving === 'pricing'}
-        onClick={() => save({ pricing: p, freeCollabLimit: Number(free) }, 'pricing')}
+        onClick={() =>
+          save(
+            {
+              // A field left blank means zero; num() keeps '' from reaching the
+              // API as NaN, which Mongo would reject with a confusing error.
+              pricing: {
+                firstSubscriptionPercent: num(p.firstSubscriptionPercent),
+                maxCombinedPercent: num(p.maxCombinedPercent),
+                minChargeablePaise: num(p.minChargeablePaise) || 100,
+              },
+              freeCollabLimit: num(free),
+            },
+            'pricing'
+          )
+        }
       >
         {saving === 'pricing' ? <Spinner className="h-4 w-4" /> : null} Save pricing
       </button>
@@ -159,7 +176,7 @@ function Ranks({ s, save, saving }) {
                 type="number"
                 min={0}
                 value={r.min}
-                onChange={(e) => update(i, { min: Number(e.target.value) })}
+                onChange={(e) => update(i, { min: e.target.value === '' ? '' : Number(e.target.value) })}
               />
             </div>
             <div className="w-20">
@@ -180,7 +197,9 @@ function Ranks({ s, save, saving }) {
                 min={0}
                 max={100}
                 value={r.discountPercent}
-                onChange={(e) => update(i, { discountPercent: Number(e.target.value) })}
+                onChange={(e) =>
+                  update(i, { discountPercent: e.target.value === '' ? '' : Number(e.target.value) })
+                }
               />
             </div>
             {ranks.length > 1 && (
@@ -200,7 +219,23 @@ function Ranks({ s, save, saving }) {
         <button className="btn-outline" onClick={add}>
           <IconPlus className="h-4 w-4" /> Add rank
         </button>
-        <button className="btn-primary" disabled={saving === 'ranks'} onClick={() => save({ ranks }, 'ranks')}>
+        <button
+          className="btn-primary"
+          disabled={saving === 'ranks'}
+          onClick={() =>
+            save(
+              {
+                ranks: ranks.map((r) => ({
+                  ...r,
+                  min: num(r.min),
+                  max: r.max === null || r.max === '' ? null : num(r.max),
+                  discountPercent: num(r.discountPercent),
+                })),
+              },
+              'ranks'
+            )
+          }
+        >
           {saving === 'ranks' ? <Spinner className="h-4 w-4" /> : null} Save ranks
         </button>
       </div>
@@ -309,7 +344,10 @@ function Field({ label, value, onChange, suffix, hint }) {
           type="number"
           min={0}
           value={value}
-          onChange={(e) => onChange(Number(e.target.value))}
+          // Keep '' as '' rather than coercing to 0: Number('') is 0, which
+          // would leave a stuck "0" the moment someone clears the field to
+          // retype, so typing "50" over it produced "050". Saving coerces.
+          onChange={(e) => onChange(e.target.value === '' ? '' : Number(e.target.value))}
         />
         {suffix && (
           <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-sm text-ink-400">

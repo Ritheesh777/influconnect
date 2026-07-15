@@ -5,6 +5,13 @@ import { User } from '../models/User.js';
 import { CompanyProfile } from '../models/CompanyProfile.js';
 import { CreatorProfile } from '../models/CreatorProfile.js';
 import { Campaign } from '../models/Campaign.js';
+import { Application } from '../models/Application.js';
+import { Collaboration } from '../models/Collaboration.js';
+import { Conversation } from '../models/Conversation.js';
+import { Message } from '../models/Message.js';
+import { Review } from '../models/Review.js';
+import { MonthlyRanking } from '../models/MonthlyRanking.js';
+import { snapshotRanking, periodKey } from '../utils/ranking.js';
 
 async function seed() {
   await connectDB();
@@ -29,6 +36,12 @@ async function seed() {
     CompanyProfile.deleteMany({}),
     CreatorProfile.deleteMany({}),
     Campaign.deleteMany({}),
+    Application.deleteMany({}),
+    Collaboration.deleteMany({}),
+    Conversation.deleteMany({}),
+    Message.deleteMany({}),
+    Review.deleteMany({}),
+    MonthlyRanking.deleteMany({}),
   ]);
 
   // Admin
@@ -85,6 +98,7 @@ async function seed() {
     { name: 'Rahul Menon', username: 'rahul.eats', followers: 68000, city: 'Kochi', avatar: img('photo-1500648767791-00dcc994a43e'), cats: ['Restaurant', 'Travel'] },
     { name: 'Zara Sheikh', username: 'zarastyle', followers: 152000, city: 'Mumbai', avatar: img('photo-1438761681033-6461ffad8d80'), cats: ['Fashion', 'Beauty'] },
   ];
+  const creators = [];
   for (const c of creatorSeeds) {
     const user = await User.create({
       role: 'creator',
@@ -95,7 +109,7 @@ async function seed() {
       isAdminVerified: true,
       profileCompleted: true,
     });
-    await CreatorProfile.create({
+    const profile = await CreatorProfile.create({
       user: user._id,
       fullName: c.name,
       username: c.username,
@@ -114,6 +128,7 @@ async function seed() {
         },
       ],
     });
+    creators.push({ user, profile });
   }
 
   // Campaigns
@@ -140,9 +155,10 @@ async function seed() {
       followerRange: '25K-50K',
     },
   ];
+  const campaigns = [];
   for (const s of campaignSeeds) {
     const { user, profile } = companies[s.idx];
-    await Campaign.create({
+    campaigns.push(await Campaign.create({
       company: user._id,
       companyProfile: profile._id,
       title: s.title,
@@ -157,9 +173,139 @@ async function seed() {
       deadline: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000),
       bannerUrl: categoryImg[s.category] || '',
       isFeatured: true,
-    });
+    }));
   }
 
+  /**
+   * Relationship data (v2 §29–§32, §13–§16).
+   *
+   * Without this the demo has campaigns but no applications, collaborations,
+   * reviews or rank history — so the admin relationship views, the trophy card
+   * and the rank discount all render empty and look broken.
+   *
+   * Deliberately spread across statuses and months: one pending application to
+   * review, one active collaboration (which also unlocks a chat), and completed
+   * ones both this month and last, so the monthly reset in §14 is visible.
+   */
+  const monthsAgo = (n) => {
+    const d = new Date();
+    d.setMonth(d.getMonth() - n);
+    return d;
+  };
+
+  const rel = [
+    // campaign idx, creator idx, application status, collaboration status, completedAt
+    { c: 0, k: 0, app: 'accepted', collab: 'completed', done: monthsAgo(0) },
+    { c: 0, k: 1, app: 'accepted', collab: 'active', done: null },
+    { c: 0, k: 2, app: 'pending', collab: null, done: null },
+    { c: 1, k: 2, app: 'accepted', collab: 'completed', done: monthsAgo(0) },
+    { c: 1, k: 0, app: 'rejected', collab: null, done: null },
+    { c: 2, k: 1, app: 'accepted', collab: 'completed', done: monthsAgo(1) },
+  ];
+
+  let collabCount = 0;
+  for (const r of rel) {
+    const campaign = campaigns[r.c];
+    const creator = creators[r.k];
+    const application = await Application.create({
+      campaign: campaign._id,
+      company: campaign.company,
+      creator: creator.user._id,
+      status: r.app,
+      message: 'I love this brand and my audience is a strong match for this campaign.',
+      respondedAt: r.app === 'pending' ? undefined : new Date(),
+    });
+    if (!r.collab) continue;
+
+    const collaboration = await Collaboration.create({
+      campaign: campaign._id,
+      application: application._id,
+      company: campaign.company,
+      creator: creator.user._id,
+      status: r.collab,
+      completedAt: r.done || undefined,
+    });
+    collabCount++;
+
+    // Chat only exists where a collaboration does — that IS the unlock rule (§20).
+    const convo = await Conversation.create({
+      campaign: campaign._id,
+      application: application._id,
+      collaboration: collaboration._id,
+      participants: [campaign.company, creator.user._id],
+      lastMessage: 'Sounds great — sending the brief over now.',
+      lastMessageAt: new Date(),
+    });
+    await Message.create([
+      {
+        conversation: convo._id,
+        sender: campaign.company,
+        body: `Hi ${creator.user.name.split(' ')[0]}, thanks for applying. Are you free to shoot this week?`,
+        readBy: [campaign.company, creator.user._id],
+      },
+      {
+        conversation: convo._id,
+        sender: creator.user._id,
+        body: 'Yes, absolutely. I can deliver by Friday.',
+        readBy: [campaign.company, creator.user._id],
+      },
+      {
+        conversation: convo._id,
+        sender: campaign.company,
+        body: 'Sounds great — sending the brief over now.',
+        readBy: [campaign.company],
+      },
+    ]);
+
+    // Reviews only make sense once the work is finished
+    if (r.collab === 'completed') {
+      await Review.create([
+        {
+          collaboration: collaboration._id,
+          campaign: campaign._id,
+          author: campaign.company,
+          subject: creator.user._id,
+          authorRole: 'company',
+          rating: 5,
+          comment: 'Delivered on time and the content performed above our expectations.',
+        },
+        {
+          collaboration: collaboration._id,
+          campaign: campaign._id,
+          author: creator.user._id,
+          subject: campaign.company,
+          authorRole: 'creator',
+          rating: 5,
+          comment: 'Clear brief and quick to respond. Would work with them again.',
+        },
+      ]);
+    }
+  }
+
+  // Rank snapshots for the current month (§14) …
+  for (const c of creators) await snapshotRanking(c.user._id, 'creator');
+  for (const c of companies) await snapshotRanking(c.user._id, 'company');
+
+  // … plus a prior month, so "previous month" and "highest ever" have something
+  // to show and the monthly reset is demonstrable rather than theoretical.
+  const prev = periodKey(monthsAgo(1));
+  await MonthlyRanking.updateOne(
+    { user: creators[0].user._id, period: prev },
+    {
+      $setOnInsert: {
+        user: creators[0].user._id,
+        role: 'creator',
+        period: prev,
+        completed: 9,
+        rankKey: 'silver',
+        rankName: 'Silver',
+        discountPercent: 10,
+      },
+    },
+    { upsert: true }
+  );
+
+  console.log(`   ${campaigns.length} campaigns · ${rel.length} applications · ${collabCount} collaborations`);
   console.log('✅ Seed complete.');
   console.log(`   Admin:   ${env.admin.email} / ${env.admin.password}`);
   console.log(`   Company: spiceroutekitchen@demo.com / Password@123`);
