@@ -7,6 +7,7 @@ import QuotaCard from '../../components/QuotaCard.jsx';
 import { timeAgo } from '../../utils/format.js';
 import { IconCampaign, IconInbox, IconHandshake, IconTrending, IconPlus, IconArrowRight } from '../../components/icons.jsx';
 import RankCard from '../../components/RankCard.jsx';
+import PremiumBadge from '../../components/PremiumBadge.jsx';
 
 export default function CompanyDashboard() {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export default function CompanyDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-ink-950">Welcome back, {user?.name}</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-ink-950">Welcome back, {user?.name} {user?.subscription?.status === 'active' && new Date(user.subscription.expiresAt) > new Date() && <PremiumBadge size={24} className="ml-1 align-middle" />}</h1>
           <p className="text-ink-500">Here's what's happening with your campaigns.</p>
         </div>
         <Link to="/company/campaigns/new" className="btn-primary">

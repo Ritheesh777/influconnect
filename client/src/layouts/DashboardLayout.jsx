@@ -182,7 +182,7 @@ export default function DashboardLayout() {
               />
               <span className="hidden max-w-[140px] truncate text-sm font-medium text-ink-700 sm:block">{user?.name}</span>
               {user?.subscription?.status === 'active' && new Date(user.subscription.expiresAt) > new Date() && (
-                <PremiumPill className="hidden sm:inline-flex" />
+                <PremiumBadge size={16} className="hidden sm:inline-block" />
               )}
             </Link>
           </div>
