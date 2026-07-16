@@ -99,6 +99,27 @@
   .text-gradient {
     @apply text-brand-500;
   }
+
+  /* ── Logo palette (sampled from brand/collably-logo-1024.png) ──────────────
+     pink #ff2978 · orange #fe8b14 · violet #8020f2 · blue #008dff.
+     Reserved for PREMIUM status so the gradient stays scarce and means
+     something — the editorial cream/ink/coral remains the base system. */
+  .grad-logo {
+    background-image: linear-gradient(120deg, #ff2978 0%, #8020f2 52%, #008dff 100%);
+  }
+  .text-gradient-logo {
+    background-image: linear-gradient(100deg, #ff2978 0%, #8020f2 55%, #008dff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  /* Premium avatar ring: a 2px gradient border via padding, so it works around
+     both <img> avatars and initial-fallback avatars. */
+  .ring-premium {
+    background-image: linear-gradient(120deg, #ff2978, #8020f2 55%, #008dff);
+    padding: 2.5px;
+    border-radius: 9999px;
+  }
   .skeleton {
     @apply relative overflow-hidden rounded-lg bg-ink-100;
   }

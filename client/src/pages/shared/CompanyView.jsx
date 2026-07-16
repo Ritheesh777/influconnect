@@ -5,6 +5,7 @@ import { Avatar, PageLoader, EmptyState, StatusBadge } from '../../components/ui
 import LockedContact from '../../components/LockedContact.jsx';
 import { RankBadge } from '../../components/Trophy.jsx';
 import { formatDate } from '../../utils/format.js';
+import PremiumBadge from '../../components/PremiumBadge.jsx';
 import {
   IconCompany, IconPin, IconGlobe, IconVerified, IconStar, IconBriefcase, IconHandshake,
   IconMail, IconPhone,
@@ -57,6 +58,7 @@ export default function CompanyView() {
               <h1 className="font-display text-2xl font-semibold text-ink-950">{u.name}</h1>
               {/* §17/§18 — the verification badge and the collaboration
                   indicator are deliberately different things. */}
+              {data.premium && <PremiumBadge />}
               {u.isAdminVerified && (
                 <span className="badge inline-flex items-center gap-1 bg-sky-50 text-sky-700">
                   <IconVerified className="h-3.5 w-3.5" /> Verified company

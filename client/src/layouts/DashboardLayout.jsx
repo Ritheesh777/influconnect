@@ -69,8 +69,11 @@ export default function DashboardLayout() {
     navigate('/login');
   };
 
+  // Each item is a real bordered button with space between — user feedback:
+  // plain text rows with no separation read as "not buttons". Active = solid
+  // ink (same treatment as btn-primary) so the current page is unmissable.
   const SideNav = (
-    <nav className="flex flex-col gap-0.5 p-3">
+    <nav className="flex flex-col gap-1.5 p-3">
       {nav.map((n) => {
         const Icon = n.icon;
         return (
@@ -80,24 +83,24 @@ export default function DashboardLayout() {
             end={n.end}
             onClick={() => setOpen(false)}
             className={({ isActive }) =>
-              `group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive ? 'text-brand-700' : 'text-ink-500 hover:bg-ink-100 hover:text-ink-800'
+              `flex items-center gap-3 rounded-xl border px-3.5 py-2.5 text-sm font-semibold transition-all ${
+                isActive
+                  ? 'border-ink-900 bg-ink-900 text-paper shadow-sm'
+                  : 'border-ink-200 bg-surface text-ink-600 hover:border-ink-300 hover:bg-ink-50 hover:text-ink-900'
               }`
             }
           >
             {({ isActive }) => (
               <>
-                {isActive && (
-                  <motion.span
-                    layoutId="nav-active"
-                    className="absolute inset-0 rounded-xl bg-brand-50"
-                    transition={{ type: 'spring', stiffness: 500, damping: 40 }}
-                  />
-                )}
-                <Icon className="relative z-10 h-[18px] w-[18px]" strokeWidth={2} />
-                <span className="relative z-10 flex-1">{n.label}</span>
+                <Icon
+                  className={`h-[18px] w-[18px] shrink-0 ${isActive ? 'text-brand-300' : 'text-ink-400'}`}
+                  strokeWidth={2.2}
+                />
+                <span className="flex-1">{n.label}</span>
                 {n.label === 'Notifications' && unreadNotifications > 0 && (
-                  <span className="relative z-10 badge bg-accent-500 text-white">{unreadNotifications}</span>
+                  <span className={`badge ${isActive ? 'bg-brand-500 text-white' : 'bg-accent-500 text-white'}`}>
+                    {unreadNotifications}
+                  </span>
                 )}
               </>
             )}
@@ -106,9 +109,9 @@ export default function DashboardLayout() {
       })}
       <button
         onClick={doLogout}
-        className="mt-1 flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-rose-600 hover:bg-rose-50"
+        className="mt-2 flex items-center gap-3 rounded-xl border border-rose-200 bg-surface px-3.5 py-2.5 text-sm font-semibold text-rose-600 transition-all hover:border-rose-300 hover:bg-rose-50"
       >
-        <IconLogout className="h-[18px] w-[18px]" strokeWidth={2} /> Logout
+        <IconLogout className="h-[18px] w-[18px]" strokeWidth={2.2} /> Logout
       </button>
     </nav>
   );
@@ -169,7 +172,13 @@ export default function DashboardLayout() {
               className="flex items-center gap-2 rounded-lg p-1 transition hover:bg-ink-100"
               title="Open my profile"
             >
-              <Avatar src={avatarSrc} name={user?.name} size={34} ring />
+              <Avatar
+                src={avatarSrc}
+                name={user?.name}
+                size={34}
+                ring
+                premium={user?.subscription?.status === 'active' && new Date(user.subscription.expiresAt) > new Date()}
+              />
               <span className="hidden max-w-[140px] truncate text-sm font-medium text-ink-700 sm:block">{user?.name}</span>
             </Link>
           </div>

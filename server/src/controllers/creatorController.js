@@ -7,6 +7,7 @@ import { Review } from '../models/Review.js';
 import { User } from '../models/User.js';
 import { Collaboration } from '../models/Collaboration.js';
 import { tierFor } from '../utils/tiers.js';
+import { hasActiveSubscription } from '../utils/quota.js';
 import { quotaFor } from '../utils/quota.js';
 import {
   hasAcceptedCollaboration,
@@ -137,7 +138,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
 // GET /api/creator/:id  (public profile — as seen by a company)
 export const getPublicCreator = asyncHandler(async (req, res) => {
   const doc = await CreatorProfile.findOne({ user: req.params.id })
-    .populate('user', 'name isAdminVerified createdAt email phone')
+    .populate('user', 'name isAdminVerified createdAt email phone subscription')
     .lean();
   if (!doc) throw ApiError.notFound('Creator not found');
 
@@ -160,6 +161,9 @@ export const getPublicCreator = asyncHandler(async (req, res) => {
     success: true,
     profile: sanitizeCreatorProfile(doc, unlocked),
     contactUnlocked: unlocked,
+    // Status colours each mean one thing: blue = verified, green = collaborating,
+    // logo gradient = premium. Only the boolean leaves the server.
+    premium: hasActiveSubscription(doc.user),
     contact: unlocked
       ? { email: doc.user?.email, phone: doc.user?.phone }
       : maskedContact(doc.user),
@@ -191,7 +195,7 @@ export const searchCreators = asyncHandler(async (req, res) => {
       .sort('-totalFollowers -ratingAvg')
       .skip(skip)
       .limit(Number(limit))
-      .populate('user', 'name isAdminVerified status')
+      .populate('user', 'name isAdminVerified status subscription')
       .lean(),
     CreatorProfile.countDocuments(filter),
   ]);
@@ -199,7 +203,7 @@ export const searchCreators = asyncHandler(async (req, res) => {
   // Search results never expose handles/contact — discovery is allowed, contact is not (§4)
   const visible = items
     .filter((c) => c.user && c.user.status === 'active')
-    .map((c) => sanitizeCreatorProfile(c, false));
+    .map((c) => ({ ...sanitizeCreatorProfile(c, false), premium: hasActiveSubscription(c.user) }));
 
   res.json({
     success: true,

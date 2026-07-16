@@ -27,15 +27,19 @@ export default {
           700: '#0f5641',
         },
         // Warm near-black ink scale — the backbone of an editorial look
+        // The 300–600 steps were shifted one stop darker after user feedback:
+        // the old 400 (#8b8069) sat at a 3.1:1 contrast ratio on the cream
+        // paper — below WCAG AA — and with ~180 usages the whole site read
+        // "dim". Darkening the scale (not each usage) keeps hierarchy intact.
         ink: {
           50: '#f6f3ec',
           100: '#ece6da',
           200: '#ddd5c4',
-          300: '#c0b6a1',
-          400: '#8b8069',
-          500: '#6b6152',
-          600: '#4d453a',
-          700: '#37312a',
+          300: '#a89c85',
+          400: '#6b6152',
+          500: '#4d453a',
+          600: '#37312a',
+          700: '#2c2721',
           800: '#26221c',
           900: '#1a1713',
           950: '#0f0d0a',

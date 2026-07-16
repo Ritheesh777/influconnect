@@ -53,8 +53,11 @@ export const scrubText = (v = '') =>
  * Locked → handles/contact masked. Unlocked → full details (§16).
  */
 export function sanitizeCreatorProfile(profile, unlocked) {
-  if (unlocked) return profile;
   const p = { ...profile };
+  // Raw subscription details (plan, expiry) are never another user's business —
+  // even a collaborating partner only gets the derived `premium` boolean.
+  if (p.user) p.user = { ...p.user, subscription: undefined };
+  if (unlocked) return p;
   p.socials = (p.socials || []).map((s) => ({
     ...s,
     username: maskHandle(s.username),
@@ -70,8 +73,9 @@ export function sanitizeCreatorProfile(profile, unlocked) {
 
 /** Returns a company profile safe to send to `viewerId`. */
 export function sanitizeCompanyProfile(profile, unlocked) {
-  if (unlocked) return profile;
   const p = { ...profile };
+  if (p.user) p.user = { ...p.user, subscription: undefined };
+  if (unlocked) return p;
   p.website = maskUrl(p.website);
   p.address = scrubText(p.address || '');
   p.description = scrubText(p.description || '');

@@ -40,7 +40,7 @@ export default function Landing() {
             </FadeIn>
             <FadeIn delay={0.06}>
               <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] tracking-tight text-ink-950 sm:text-6xl">
-                Where brands meet the <span className="text-gradient">right creators</span>.
+                Where brands meet the <span className="text-gradient-logo">right creators</span>.
               </h1>
             </FadeIn>
             <FadeIn delay={0.12}>

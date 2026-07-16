@@ -13,6 +13,7 @@ import {
   maskedContact,
 } from '../utils/privacy.js';
 import { quotaFor } from '../utils/quota.js';
+import { hasActiveSubscription } from '../utils/quota.js';
 
 // GET /api/company/me
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -109,7 +110,7 @@ export const getDashboard = asyncHandler(async (req, res) => {
 // GET /api/company/:id  (public profile view, e.g. shown to creators)
 export const getPublicCompany = asyncHandler(async (req, res) => {
   const doc = await CompanyProfile.findOne({ user: req.params.id })
-    .populate('user', 'name isAdminVerified createdAt email phone')
+    .populate('user', 'name isAdminVerified createdAt email phone subscription')
     .lean();
   if (!doc) throw ApiError.notFound('Company not found');
 
@@ -127,6 +128,7 @@ export const getPublicCompany = asyncHandler(async (req, res) => {
     success: true,
     profile: sanitizeCompanyProfile(doc, unlocked),
     contactUnlocked: unlocked,
+    premium: hasActiveSubscription(doc.user),
     contact: unlocked
       ? { email: doc.user?.email, phone: doc.user?.phone }
       : maskedContact(doc.user),

@@ -5,6 +5,7 @@ import { PageLoader, Spinner, StatusBadge } from '../../components/ui.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { formatDate } from '../../utils/format.js';
 import { IconCheck, IconSparkles, IconTrophy, IconHandshake } from '../../components/icons.jsx';
+import PremiumBadge from '../../components/PremiumBadge.jsx';
 
 const RZP_SDK = 'https://checkout.razorpay.com/v1/checkout.js';
 
@@ -96,6 +97,10 @@ export default function Subscribe() {
       if (!ok) throw new Error('Could not load the payment window. Check your connection.');
 
       const { order, keyId, quote: q } = res;
+      // A response with no order should never reach here (free returns above,
+      // errors throw) — but reading order.id off undefined once crashed a stale
+      // cached page mid-deploy, so fail with words instead of a TypeError.
+      if (!order?.id) throw new Error('The payment could not be started. Please refresh the page and try again.');
 
       const rzp = new window.Razorpay({
         key: keyId,
@@ -157,7 +162,7 @@ export default function Subscribe() {
               <h2 className="text-lg font-semibold text-ink-950 capitalize">
                 {isActive ? current.plan : 'Free plan'}
               </h2>
-              <StatusBadge status={isActive ? 'active' : 'pending'} />
+              {isActive ? <PremiumBadge /> : <StatusBadge status="pending" />}
             </div>
             <p className="mt-0.5 text-sm text-ink-500">
               {isActive

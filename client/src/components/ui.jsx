@@ -42,12 +42,12 @@ export function StatusBadge({ status }) {
   );
 }
 
-export function Avatar({ src, name = '', size = 40, className = '', ring = false }) {
+export function Avatar({ src, name = '', size = 40, className = '', ring = false, premium = false }) {
   const dim = { width: size, height: size };
   const ringCls = ring ? 'ring-2 ring-white shadow-soft' : '';
-  if (src)
-    return <img src={src} alt={name} style={dim} className={`rounded-full object-cover ${ringCls} ${className}`} />;
-  return (
+  const core = src ? (
+    <img src={src} alt={name} style={dim} className={`rounded-full object-cover ${ringCls} ${className}`} />
+  ) : (
     <div
       style={{ ...dim, fontSize: size * 0.36 }}
       className={`flex items-center justify-center rounded-full bg-brand-gradient font-semibold text-white ${ringCls} ${className}`}
@@ -55,6 +55,10 @@ export function Avatar({ src, name = '', size = 40, className = '', ring = false
       {initials(name) || '?'}
     </div>
   );
+  // Premium members wear the logo gradient as a ring — the one place the
+  // vibrant palette appears, so it reads as status, not decoration.
+  if (premium) return <span className="ring-premium inline-flex shrink-0">{core}</span>;
+  return core;
 }
 
 export function EmptyState({ icon: Icon = IconInbox, title, subtitle, action }) {

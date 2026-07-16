@@ -6,6 +6,7 @@ import { PageLoader, Avatar, EmptyState, Pagination } from '../../components/ui.
 import { compactNumber } from '../../utils/format.js';
 import { CAMPAIGN_CATEGORIES, ALL_PLATFORMS, PLATFORM_LABELS, FOLLOWER_FILTERS } from '../../utils/constants.js';
 import { IconVerified, IconUsers, IconPin, IconSearch, PLATFORM_ICON } from '../../components/icons.jsx';
+import PremiumBadge from '../../components/PremiumBadge.jsx';
 
 export default function FindCreators() {
   const [filters, setFilters] = useState({ page: 1 });
@@ -71,6 +72,7 @@ export default function FindCreators() {
                       <div className="flex items-center gap-1 font-semibold text-ink-900">
                         <span className="truncate">{c.fullName}</span>
                         {c.user?.isAdminVerified && <IconVerified className="h-4 w-4 shrink-0 text-brand-600" />}
+                        {c.premium && <PremiumBadge size="sm" />}
                       </div>
                       <div className="truncate text-xs text-ink-400">@{c.username}</div>
                     </div>
