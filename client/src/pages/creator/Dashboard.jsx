@@ -27,7 +27,7 @@ export default function CreatorDashboard() {
     <div className="space-y-6">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
         <div>
-          <h1 className="flex items-center gap-2 text-2xl font-bold text-ink-950">Hi {user?.name} {user?.subscription?.status === 'active' && new Date(user.subscription.expiresAt) > new Date() && <PremiumBadge size={24} className="ml-1 align-middle" />}</h1>
+          <h1 className="flex items-center gap-2 text-2xl font-bold text-ink-950">Hi, {user?.name} {user?.subscription?.status === 'active' && new Date(user.subscription.expiresAt) > new Date() && <PremiumBadge size={24} className="ml-1 align-middle" />}</h1>
           <p className="text-ink-500">Find your next brand collaboration.</p>
         </div>
         <Link to="/creator/browse" className="btn-primary">
