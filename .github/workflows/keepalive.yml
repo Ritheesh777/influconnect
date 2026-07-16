@@ -1,0 +1,24 @@
+# Keeps the free-tier Render service awake so the payment window opens instantly.
+#
+# Render's free plan suspends a service after ~15 min idle; the next request then
+# waits 30-50s for a cold start, during which the Razorpay checkout appears not
+# to open at all. Pinging /health every 10 min keeps it warm. This runs on
+# GitHub's infrastructure, so it does not depend on any external cron service.
+name: keep-alive
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # every 10 minutes
+  workflow_dispatch:          # and a manual "Run" button
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping the Collably API
+        run: |
+          for i in 1 2 3; do
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 60 \
+              https://collably-api-1yvk.onrender.com/api/health) && break
+            sleep 20
+          done
+          echo "health → $code"
+          [ "$code" = "200" ] || exit 1
